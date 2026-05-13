@@ -1,0 +1,101 @@
+{% extends 'checker/base.html' %}
+
+{% block title %}HTTP Security Header Checker — eussec.com{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 { font-size: 2rem; color: #e6edf3; margin-bottom: 8px; }
+    .page-header p { color: #8b949e; }
+
+    .form-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 28px; margin-bottom: 32px; }
+    .input-row { display: flex; gap: 12px; }
+    .input-row input { flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px 16px; color: #c9d1d9; font-size: 1rem; outline: none; transition: border-color 0.2s; }
+    .input-row input:focus { border-color: #58a6ff; }
+    .input-row button { background: #238636; color: #fff; border: none; border-radius: 6px; padding: 12px 24px; font-size: 1rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+    .input-row button:hover { background: #2ea043; }
+
+    .error { background: #3d1c1c; border: 1px solid #f85149; border-radius: 8px; padding: 14px 18px; color: #f85149; margin-bottom: 24px; }
+
+    .score-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 28px; margin-bottom: 24px; display: flex; align-items: center; gap: 28px; }
+    .score-circle { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 700; flex-shrink: 0; }
+    .score-high { background: #1a3a1a; color: #3fb950; border: 3px solid #3fb950; }
+    .score-mid  { background: #3a2f0a; color: #d29922; border: 3px solid #d29922; }
+    .score-low  { background: #3d1c1c; color: #f85149; border: 3px solid #f85149; }
+    .score-info h3 { font-size: 1.1rem; color: #e6edf3; margin-bottom: 6px; }
+    .score-info p { color: #8b949e; font-size: 0.9rem; }
+
+    .results { display: flex; flex-direction: column; gap: 12px; }
+    .result-item { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 18px 20px; display: flex; align-items: flex-start; gap: 16px; }
+    .result-item.present { border-left: 3px solid #3fb950; }
+    .result-item.missing { border-left: 3px solid #f85149; }
+    .status-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+    .header-name { font-weight: 600; color: #e6edf3; font-size: 0.95rem; margin-bottom: 4px; }
+    .header-desc { color: #8b949e; font-size: 0.85rem; margin-bottom: 6px; }
+    .header-value { font-family: monospace; font-size: 0.8rem; color: #58a6ff; background: #0d1117; padding: 4px 8px; border-radius: 4px; word-break: break-all; }
+    .missing-label { font-size: 0.8rem; color: #f85149; }
+    .badge-high   { background: #3d1c1c; color: #f85149; }
+    .badge-medium { background: #3a2f0a; color: #d29922; }
+    .badge-low    { background: #1a2a3a; color: #58a6ff; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>HTTP Security Header Checker</h1>
+    <p>Enter any URL to analyze its security headers and get an instant score.</p>
+</div>
+
+<div class="form-card">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="input-row">
+            <input type="text" name="url" placeholder="Enter a URL, e.g. example.com" value="{{ url|default:'' }}" autofocus>
+            <button type="submit">Analyze</button>
+        </div>
+    </form>
+</div>
+
+{% if error %}
+<div class="error">{{ error }}</div>
+{% endif %}
+
+{% if results %}
+<div class="score-card">
+    <div class="score-circle {% if score >= 70 %}score-high{% elif score >= 40 %}score-mid{% else %}score-low{% endif %}">
+        {{ score }}%
+    </div>
+    <div class="score-info">
+        <h3>Security Score for {{ url }}</h3>
+        <p>
+            {% if score >= 70 %}Good security posture. Keep monitoring regularly.
+            {% elif score >= 40 %}Some headers are missing. Review the results below.
+            {% else %}Critical headers are missing. Immediate action recommended.
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="results">
+    {% for item in results %}
+    <div class="result-item {% if item.present %}present{% else %}missing{% endif %}">
+        <div class="status-icon">{% if item.present %}✅{% else %}❌{% endif %}</div>
+        <div>
+            <div class="header-name">
+                {{ item.header }}
+                <span class="badge badge-{{ item.severity }}">{{ item.severity }}</span>
+            </div>
+            <div class="header-desc">{{ item.description }}</div>
+            {% if item.present %}
+            <div class="header-value">{{ item.value }}</div>
+            {% else %}
+            <div class="missing-label">Header not found</div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

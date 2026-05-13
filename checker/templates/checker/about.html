@@ -1,0 +1,185 @@
+{% extends 'checker/base.html' %}
+
+{% block title %}About — Emrah Ustundag{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-hero { display: flex; align-items: flex-start; gap: 32px; margin-bottom: 56px; }
+    .about-avatar { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #1a2a3a, #238636); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; flex-shrink: 0; border: 2px solid #30363d; }
+    .about-hero-text h1 { font-size: 2rem; color: #e6edf3; margin-bottom: 8px; }
+    .about-hero-text .role { color: #58a6ff; font-size: 1rem; margin-bottom: 12px; }
+    .about-hero-text p { color: #8b949e; font-size: 0.95rem; line-height: 1.7; }
+    .social-links { display: flex; gap: 12px; margin-top: 16px; }
+
+    .section-title { font-size: 1.1rem; font-weight: 700; color: #e6edf3; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #30363d; }
+    .section { margin-bottom: 48px; }
+
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+    .timeline-item { display: flex; gap: 20px; padding-bottom: 28px; position: relative; }
+    .timeline-item:not(:last-child)::before { content: ''; position: absolute; left: 7px; top: 18px; bottom: 0; width: 1px; background: #30363d; }
+    .timeline-dot { width: 16px; height: 16px; border-radius: 50%; background: #238636; border: 2px solid #0d1117; flex-shrink: 0; margin-top: 4px; }
+    .timeline-content h3 { color: #e6edf3; font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    .timeline-content .meta { color: #58a6ff; font-size: 0.82rem; margin-bottom: 6px; }
+    .timeline-content p { color: #8b949e; font-size: 0.85rem; line-height: 1.6; }
+
+    .skills-group { margin-bottom: 20px; }
+    .skills-group-label { color: #8b949e; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .skills-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .cert-item { display: flex; align-items: flex-start; gap: 16px; padding: 16px 0; border-bottom: 1px solid #21262d; }
+    .cert-item:last-child { border-bottom: none; }
+    .cert-icon { font-size: 1.4rem; }
+    .cert-name { color: #e6edf3; font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    .cert-detail { color: #8b949e; font-size: 0.85rem; }
+
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .contact-item { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; transition: border-color 0.2s; }
+    .contact-item:hover { border-color: #58a6ff; }
+    .contact-item .icon { font-size: 1.2rem; }
+    .contact-item .label { color: #8b949e; font-size: 0.78rem; }
+    .contact-item .value { color: #e6edf3; font-size: 0.9rem; }
+
+    @media (max-width: 640px) {
+        .about-hero { flex-direction: column; }
+        .contact-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<div class="about-hero">
+    <div class="about-avatar">E</div>
+    <div class="about-hero-text">
+        <h1>Emrah Ustundag</h1>
+        <div class="role">Software Engineering Student · Cybersecurity Enthusiast</div>
+        <p>I'm a software engineering student at Atılım University, Ankara. My focus is on building secure software and understanding how systems can be broken and defended. I'm interested in backend development, network security, and secure software design.</p>
+        <div class="social-links">
+            <a href="https://github.com/emrahustundag" target="_blank" class="btn btn-outline">GitHub</a>
+            <a href="https://linkedin.com/in/emrah-üstündağ-4963b3256" target="_blank" class="btn btn-outline">LinkedIn</a>
+            <a href="mailto:emrahustundag@outlook.com" class="btn btn-primary">Contact</a>
+        </div>
+    </div>
+</div>
+
+<!-- EDUCATION -->
+<section class="section">
+    <div class="section-title">Education</div>
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <h3>Atılım University — Software Engineering</h3>
+                <div class="meta">2022 – Present · Ankara, Turkey</div>
+                <p>Courses: C, C++, Python, Data Structures & Algorithms, Database Systems, Computer Networks & Operating Systems, Software Testing & Verification, Software Architecture, Object-Oriented Programming.</p>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <h3>Kaplan English School</h3>
+                <div class="meta">July – August 2024 · Great Britain</div>
+                <p>B2 level English proficiency certificate.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SKILLS -->
+<section class="section">
+    <div class="section-title">Skills</div>
+    <div class="skills-group">
+        <div class="skills-group-label">Languages</div>
+        <div class="skills-row">
+            <span class="badge badge-blue">Python</span>
+            <span class="badge badge-blue">C</span>
+            <span class="badge badge-blue">C++</span>
+            <span class="badge badge-blue">C#</span>
+            <span class="badge badge-blue">Assembly</span>
+            <span class="badge badge-blue">HTML / CSS / JS</span>
+            <span class="badge badge-blue">Oracle SQL</span>
+        </div>
+    </div>
+    <div class="skills-group">
+        <div class="skills-group-label">Frameworks & Tools</div>
+        <div class="skills-row">
+            <span class="badge badge-orange">Django</span>
+            <span class="badge badge-orange">Oracle DB</span>
+            <span class="badge badge-orange">Git</span>
+        </div>
+    </div>
+    <div class="skills-group">
+        <div class="skills-group-label">Security</div>
+        <div class="skills-row">
+            <span class="badge badge-green">Network Security</span>
+            <span class="badge badge-green">SIEM Tools</span>
+            <span class="badge badge-green">Incident Response</span>
+            <span class="badge badge-green">Risk Management</span>
+            <span class="badge badge-green">Secure Software Practices</span>
+        </div>
+    </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section class="section">
+    <div class="section-title">Certifications</div>
+    <div class="cert-item">
+        <div class="cert-icon">🛡️</div>
+        <div>
+            <div class="cert-name">Google Cybersecurity Professional Certificate</div>
+            <div class="cert-detail">Risk management · Network security · SIEM tools · Incident response<br>Certificate No: CGFKAK3FFLSI · 2026</div>
+        </div>
+    </div>
+    <div class="cert-item">
+        <div class="cert-icon">💻</div>
+        <div>
+            <div class="cert-name">CSCON'24 — C#</div>
+            <div class="cert-detail">2024</div>
+        </div>
+    </div>
+    <div class="cert-item">
+        <div class="cert-icon">🎓</div>
+        <div>
+            <div class="cert-name">Certificate of Honor × 2</div>
+            <div class="cert-detail">Atılım University · 2022–2023 Prep School · 2023–2024</div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section">
+    <div class="section-title">Contact</div>
+    <div class="contact-grid">
+        <a href="mailto:emrahustundag@outlook.com" class="contact-item">
+            <div class="icon">✉️</div>
+            <div>
+                <div class="label">Email</div>
+                <div class="value">emrahustundag@outlook.com</div>
+            </div>
+        </a>
+        <a href="https://linkedin.com/in/emrah-üstündağ-4963b3256" target="_blank" class="contact-item">
+            <div class="icon">💼</div>
+            <div>
+                <div class="label">LinkedIn</div>
+                <div class="value">emrah-üstündağ</div>
+            </div>
+        </a>
+        <a href="https://github.com/emrahustundag" target="_blank" class="contact-item">
+            <div class="icon">🐙</div>
+            <div>
+                <div class="label">GitHub</div>
+                <div class="value">emrahustundag</div>
+            </div>
+        </a>
+        <div class="contact-item">
+            <div class="icon">📍</div>
+            <div>
+                <div class="label">Location</div>
+                <div class="value">Ankara, Turkey</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

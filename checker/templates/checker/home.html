@@ -1,0 +1,161 @@
+{% extends 'checker/base.html' %}
+
+{% block title %}Emrah Ustundag — Security & Software{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero { display: flex; flex-direction: column; gap: 16px; margin-bottom: 64px; }
+    .hero-tag { color: #3fb950; font-size: 0.9rem; font-weight: 600; letter-spacing: 1px; }
+    .hero h1 { font-size: 2.8rem; color: #e6edf3; line-height: 1.2; }
+    .hero h1 span { color: #58a6ff; }
+    .hero p { color: #8b949e; font-size: 1.05rem; max-width: 600px; line-height: 1.7; }
+    .hero-buttons { display: flex; gap: 12px; margin-top: 8px; }
+
+    .section-title { font-size: 1.1rem; font-weight: 700; color: #e6edf3; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #30363d; }
+
+    /* SKILLS */
+    .skills-section { margin-bottom: 56px; }
+    .skills-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    /* PROJECTS */
+    .projects-section { margin-bottom: 56px; }
+    .projects-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .project-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; text-decoration: none; color: inherit; transition: border-color 0.2s; display: block; }
+    .project-card:hover { border-color: #58a6ff; }
+    .project-card h3 { color: #e6edf3; font-size: 0.95rem; margin-bottom: 8px; }
+    .project-card p { color: #8b949e; font-size: 0.85rem; line-height: 1.6; margin-bottom: 12px; }
+    .project-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* CERTS */
+    .certs-section { margin-bottom: 56px; }
+    .cert-item { display: flex; align-items: flex-start; gap: 16px; padding: 16px 0; border-bottom: 1px solid #21262d; }
+    .cert-item:last-child { border-bottom: none; }
+    .cert-icon { font-size: 1.4rem; }
+    .cert-name { color: #e6edf3; font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    .cert-detail { color: #8b949e; font-size: 0.85rem; }
+
+    /* TOOLS PREVIEW */
+    .tools-section { margin-bottom: 56px; }
+    .tool-preview { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .tool-preview-info h3 { color: #e6edf3; font-size: 0.95rem; margin-bottom: 6px; }
+    .tool-preview-info p { color: #8b949e; font-size: 0.85rem; }
+
+    @media (max-width: 640px) {
+        .hero h1 { font-size: 2rem; }
+        .projects-grid { grid-template-columns: 1fr; }
+        .tool-preview { flex-direction: column; gap: 16px; align-items: flex-start; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-tag">// Security & Software</div>
+    <h1>Hi, I'm <span>Emrah Ustundag</span>.<br>I build secure software.</h1>
+    <p>Software Engineering student at Atılım University with a focus on cybersecurity, backend development, and secure software practices. Based in Ankara, Turkey.</p>
+    <div class="hero-buttons">
+        <a href="/about/" class="btn btn-primary">About Me</a>
+        <a href="/tools/" class="btn btn-outline">Try My Tools</a>
+    </div>
+</section>
+
+<!-- SKILLS -->
+<section class="skills-section">
+    <div class="section-title">Skills</div>
+    <div class="skills-grid">
+        <span class="badge badge-blue">Python</span>
+        <span class="badge badge-blue">Django</span>
+        <span class="badge badge-blue">C</span>
+        <span class="badge badge-blue">C++</span>
+        <span class="badge badge-blue">C#</span>
+        <span class="badge badge-blue">Oracle SQL</span>
+        <span class="badge badge-blue">HTML / CSS / JS</span>
+        <span class="badge badge-blue">Assembly</span>
+        <span class="badge badge-green">Network Security</span>
+        <span class="badge badge-green">SIEM</span>
+        <span class="badge badge-green">Incident Response</span>
+        <span class="badge badge-green">Risk Management</span>
+    </div>
+</section>
+
+<!-- PROJECTS -->
+<section class="projects-section">
+    <div class="section-title">Projects</div>
+    <div class="projects-grid">
+        <a href="https://github.com/emrahustundag" target="_blank" class="project-card">
+            <h3>Library Management System</h3>
+            <p>Web-based system with Django. Authentication, CRUD operations, normalized relational database.</p>
+            <div class="project-tags">
+                <span class="badge badge-blue">Django</span>
+                <span class="badge badge-blue">Python</span>
+                <span class="badge badge-orange">SQL</span>
+            </div>
+        </a>
+        <a href="https://github.com/emrahustundag" target="_blank" class="project-card">
+            <h3>Car Rental Management System</h3>
+            <p>Oracle-based relational database schema with full CRUD, constraints, and HTML/CSS/JS frontend.</p>
+            <div class="project-tags">
+                <span class="badge badge-orange">Oracle SQL</span>
+                <span class="badge badge-blue">HTML/CSS/JS</span>
+            </div>
+        </a>
+        <a href="/tools/headers/" class="project-card">
+            <h3>HTTP Security Header Checker</h3>
+            <p>Analyzes HTTP security headers of any website and returns a security score with detailed breakdown.</p>
+            <div class="project-tags">
+                <span class="badge badge-blue">Django</span>
+                <span class="badge badge-blue">Python</span>
+                <span class="badge badge-green">Security</span>
+            </div>
+        </a>
+        <a href="https://github.com/emrahustundag" target="_blank" class="project-card">
+            <h3>Software Companion</h3>
+            <p>Application designed for students to seek assistance from senior developers.</p>
+            <div class="project-tags">
+                <span class="badge badge-blue">Python</span>
+            </div>
+        </a>
+    </div>
+</section>
+
+<!-- CERTS -->
+<section class="certs-section">
+    <div class="section-title">Certifications</div>
+    <div class="cert-item">
+        <div class="cert-icon">🛡️</div>
+        <div>
+            <div class="cert-name">Google Cybersecurity Professional Certificate</div>
+            <div class="cert-detail">Risk management · Network security · SIEM tools · Incident response — 2026</div>
+        </div>
+    </div>
+    <div class="cert-item">
+        <div class="cert-icon">💻</div>
+        <div>
+            <div class="cert-name">CSCON'24</div>
+            <div class="cert-detail">C# — 2024</div>
+        </div>
+    </div>
+    <div class="cert-item">
+        <div class="cert-icon">🎓</div>
+        <div>
+            <div class="cert-name">Certificate of Honor</div>
+            <div class="cert-detail">Atılım University — 2023, 2024</div>
+        </div>
+    </div>
+</section>
+
+<!-- TOOLS PREVIEW -->
+<section class="tools-section">
+    <div class="section-title">Tools</div>
+    <div class="tool-preview">
+        <div class="tool-preview-info">
+            <h3>HTTP Security Header Checker</h3>
+            <p>Enter any URL and get an instant security header analysis with scoring.</p>
+        </div>
+        <a href="/tools/headers/" class="btn btn-primary">Try it →</a>
+    </div>
+</section>
+
+{% endblock %}

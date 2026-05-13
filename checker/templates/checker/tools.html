@@ -1,0 +1,77 @@
+{% extends 'checker/base.html' %}
+
+{% block title %}Tools — eussec.com{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header { margin-bottom: 40px; }
+    .page-header h1 { font-size: 2rem; color: #e6edf3; margin-bottom: 8px; }
+    .page-header p { color: #8b949e; }
+
+    .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .tool-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 24px; text-decoration: none; color: inherit; display: block; transition: border-color 0.2s; }
+    .tool-card:hover { border-color: #58a6ff; }
+    .tool-icon { font-size: 2rem; margin-bottom: 14px; }
+    .tool-card h2 { color: #e6edf3; font-size: 1rem; margin-bottom: 8px; }
+    .tool-card p { color: #8b949e; font-size: 0.87rem; line-height: 1.6; margin-bottom: 16px; }
+    .tool-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tool-link { color: #58a6ff; font-size: 0.85rem; font-weight: 600; }
+
+    .coming-soon { opacity: 0.5; cursor: default; }
+    .coming-soon:hover { border-color: #30363d; }
+
+    @media (max-width: 640px) { .tools-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>Security Tools</h1>
+    <p>Open tools for analyzing and improving web security posture.</p>
+</div>
+
+<div class="tools-grid">
+
+    <a href="/tools/headers/" class="tool-card">
+        <div class="tool-icon">🔍</div>
+        <h2>HTTP Security Header Checker</h2>
+        <p>Analyze the security headers of any website. Get a score and see which headers are missing or misconfigured.</p>
+        <div class="tool-tags">
+            <span class="badge badge-green">Live</span>
+            <span class="badge badge-blue">Python</span>
+            <span class="badge badge-blue">Django</span>
+        </div>
+        <div class="tool-link">Try it →</div>
+    </a>
+
+    <div class="tool-card coming-soon">
+        <div class="tool-icon">🌐</div>
+        <h2>Subdomain Enumerator</h2>
+        <p>Discover subdomains of a target domain using wordlist-based enumeration.</p>
+        <div class="tool-tags">
+            <span class="badge badge-orange">Coming Soon</span>
+        </div>
+    </div>
+
+    <div class="tool-card coming-soon">
+        <div class="tool-icon">📡</div>
+        <h2>SSL/TLS Certificate Checker</h2>
+        <p>Check SSL certificate validity, expiry date, and cipher suite strength for any domain.</p>
+        <div class="tool-tags">
+            <span class="badge badge-orange">Coming Soon</span>
+        </div>
+    </div>
+
+    <div class="tool-card coming-soon">
+        <div class="tool-icon">🕵️</div>
+        <h2>WHOIS & DNS Lookup</h2>
+        <p>Quick WHOIS and DNS record lookup for domain reconnaissance.</p>
+        <div class="tool-tags">
+            <span class="badge badge-orange">Coming Soon</span>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

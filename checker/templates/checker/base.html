@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}eussec.com{% endblock %}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* NAV */
+        nav { background: #161b22; border-bottom: 1px solid #30363d; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+        .nav-logo { font-size: 1.1rem; font-weight: 700; color: #58a6ff; text-decoration: none; }
+        .nav-logo span { color: #8b949e; font-weight: 400; }
+        .nav-links { display: flex; gap: 28px; list-style: none; }
+        .nav-links a { color: #8b949e; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: #e6edf3; }
+
+        /* MAIN */
+        main { flex: 1; max-width: 900px; margin: 0 auto; width: 100%; padding: 60px 24px; }
+
+        /* FOOTER */
+        footer { background: #161b22; border-top: 1px solid #30363d; text-align: center; padding: 24px; color: #484f58; font-size: 0.85rem; }
+        footer a { color: #58a6ff; text-decoration: none; }
+
+        /* UTILS */
+        .badge { display: inline-block; font-size: 0.72rem; padding: 3px 10px; border-radius: 12px; font-weight: 600; text-transform: uppercase; }
+        .badge-blue   { background: #1a2a3a; color: #58a6ff; }
+        .badge-green  { background: #1a3a1a; color: #3fb950; }
+        .badge-orange { background: #3a2f0a; color: #d29922; }
+        .badge-red    { background: #3d1c1c; color: #f85149; }
+
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 24px; }
+
+        .btn { display: inline-block; padding: 10px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: background 0.2s; }
+        .btn-primary { background: #238636; color: #fff; }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-outline { background: transparent; color: #58a6ff; border: 1px solid #30363d; }
+        .btn-outline:hover { border-color: #58a6ff; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<nav>
+    <a href="/" class="nav-logo">eussec<span>.com</span></a>
+    <ul class="nav-links">
+        <li><a href="/" {% if request.path == '/' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="/about/" {% if request.path == '/about/' %}class="active"{% endif %}>About</a></li>
+        <li><a href="/tools/" {% if '/tools' in request.path %}class="active"{% endif %}>Tools</a></li>
+        <li><a href="/blog/" {% if '/blog' in request.path %}class="active"{% endif %}>Blog</a></li>
+    </ul>
+</nav>
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<footer>
+    <p>Built by <a href="/about/">Emrah Ustundag</a> · <a href="https://github.com/emrahustundag" target="_blank">GitHub</a> · <a href="https://linkedin.com/in/emrah-üstündağ-4963b3256" target="_blank">LinkedIn</a></p>
+</footer>
+
+</body>
+</html>

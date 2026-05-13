@@ -1,0 +1,44 @@
+{% extends 'checker/base.html' %}
+
+{% block title %}Blog — eussec.com{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header { margin-bottom: 40px; }
+    .page-header h1 { font-size: 2rem; color: #e6edf3; margin-bottom: 8px; }
+    .page-header p { color: #8b949e; }
+
+    .empty-state { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 60px 40px; text-align: center; }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 16px; }
+    .empty-state h2 { color: #e6edf3; font-size: 1.1rem; margin-bottom: 8px; }
+    .empty-state p { color: #8b949e; font-size: 0.9rem; line-height: 1.6; max-width: 400px; margin: 0 auto; }
+    .upcoming { margin-top: 32px; text-align: left; max-width: 480px; margin-left: auto; margin-right: auto; }
+    .upcoming h3 { color: #8b949e; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .upcoming-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #21262d; color: #8b949e; font-size: 0.88rem; }
+    .upcoming-item:last-child { border-bottom: none; }
+    .upcoming-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #238636; flex-shrink: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>Blog</h1>
+    <p>Security writeups, tool breakdowns, and notes from the field.</p>
+</div>
+
+<div class="empty-state">
+    <div class="icon">✍️</div>
+    <h2>First post coming soon</h2>
+    <p>I'm working on the first articles. Topics will include HTTP security headers, CTF writeups, and practical security concepts.</p>
+
+    <div class="upcoming">
+        <h3>Planned Posts</h3>
+        <div class="upcoming-item"><div class="dot"></div> Why HTTP Security Headers Matter — and How to Check Them</div>
+        <div class="upcoming-item"><div class="dot"></div> What I Learned from the Google Cybersecurity Certificate</div>
+        <div class="upcoming-item"><div class="dot"></div> SQL Injection — A Developer's Perspective</div>
+        <div class="upcoming-item"><div class="dot"></div> NIS2 Directive: What It Means for Software Developers</div>
+    </div>
+</div>
+
+{% endblock %}
