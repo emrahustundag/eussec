@@ -27,6 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = ['https://eussec.com', 'https://www.eussec.com', 'https://eussec-production.up.railway.app']
+
 
 # Application definition
 
