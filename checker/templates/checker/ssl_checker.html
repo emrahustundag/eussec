@@ -1,0 +1,119 @@
+{% extends 'checker/base.html' %}
+
+{% block title %}SSL/TLS Certificate Checker — eussec.com{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header { margin-bottom: 32px; }
+    .page-header h2 { font-size: 1.8rem; color: #e6edf3; margin-bottom: 8px; }
+    .page-header p { color: #8b949e; }
+
+    .form-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 28px; margin-bottom: 32px; }
+    .input-row { display: flex; gap: 12px; }
+    .input-row input { flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px 16px; color: #c9d1d9; font-size: 1rem; outline: none; transition: border-color 0.2s; }
+    .input-row input:focus { border-color: #58a6ff; }
+    .input-row button { background: #238636; color: #fff; border: none; border-radius: 6px; padding: 12px 24px; font-size: 1rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+    .input-row button:hover { background: #2ea043; }
+
+    .error { background: #3d1c1c; border: 1px solid #f85149; border-radius: 8px; padding: 14px 18px; color: #f85149; margin-bottom: 24px; }
+
+    .result-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 28px; }
+    .result-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid #30363d; }
+    .result-icon { font-size: 2rem; }
+    .result-title h3 { font-size: 1.2rem; color: #e6edf3; margin-bottom: 4px; }
+    .result-title p { color: #8b949e; font-size: 0.85rem; }
+
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .result-item { background: #0d1117; border: 1px solid #21262d; border-radius: 8px; padding: 16px; }
+    .result-item-label { color: #8b949e; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .result-item-value { color: #e6edf3; font-size: 0.95rem; font-weight: 500; }
+    .result-item-value.mono { font-family: monospace; font-size: 0.85rem; color: #58a6ff; }
+
+    .days-left { font-size: 1.4rem; font-weight: 700; }
+    .days-safe { color: #3fb950; }
+    .days-warn { color: #d29922; }
+    .days-danger { color: #f85149; }
+
+    .valid-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .valid-yes { background: #1a3a1a; color: #3fb950; }
+    .valid-no { background: #3d1c1c; color: #f85149; }
+
+    @media (max-width: 600px) {
+        .result-grid { grid-template-columns: 1fr; }
+        .input-row { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>SSL/TLS Certificate Checker</h2>
+    <p>Check SSL certificate validity, expiry date, issuer, and cipher strength for any domain.</p>
+</div>
+
+<div class="form-card">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="input-row">
+            <input type="text" name="domain" placeholder="Enter a domain, e.g. github.com" value="{{ domain|default:'' }}" autofocus>
+            <button type="submit">Check</button>
+        </div>
+    </form>
+</div>
+
+{% if error %}
+<div class="error">{{ error }}</div>
+{% endif %}
+
+{% if result %}
+<div class="result-card">
+    <div class="result-header">
+        <div class="result-icon">{% if result.valid %}🔒{% else %}🔓{% endif %}</div>
+        <div class="result-title">
+            <h3>{{ result.domain }}
+                <span class="valid-badge {% if result.valid %}valid-yes{% else %}valid-no{% endif %}">
+                    {% if result.valid %}Valid{% else %}Expired{% endif %}
+                </span>
+            </h3>
+            <p>Issued to: {{ result.subject }}</p>
+        </div>
+    </div>
+
+    <div class="result-grid">
+        <div class="result-item">
+            <div class="result-item-label">Days Remaining</div>
+            <div class="result-item-value days-left {% if result.days_left > 30 %}days-safe{% elif result.days_left > 7 %}days-warn{% else %}days-danger{% endif %}">
+                {{ result.days_left }} days
+            </div>
+        </div>
+
+        <div class="result-item">
+            <div class="result-item-label">Issuer</div>
+            <div class="result-item-value">{{ result.issuer }}</div>
+        </div>
+
+        <div class="result-item">
+            <div class="result-item-label">Valid From</div>
+            <div class="result-item-value">{{ result.valid_from }}</div>
+        </div>
+
+        <div class="result-item">
+            <div class="result-item-label">Valid Until</div>
+            <div class="result-item-value">{{ result.valid_until }}</div>
+        </div>
+
+        <div class="result-item">
+            <div class="result-item-label">Protocol</div>
+            <div class="result-item-value mono">{{ result.protocol }}</div>
+        </div>
+
+        <div class="result-item">
+            <div class="result-item-label">Cipher Suite</div>
+            <div class="result-item-value mono">{{ result.cipher }}</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
