@@ -10,8 +10,9 @@
 
         /* NAV */
         nav { background: #161b22; border-bottom: 1px solid #30363d; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
-        .nav-logo { font-size: 1.1rem; font-weight: 700; color: #58a6ff; text-decoration: none; }
-        .nav-logo span { color: #8b949e; font-weight: 400; }
+        .nav-logo { font-size: 1.1rem; font-weight: 700; color: #58a6ff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo > span { color: #8b949e; font-weight: 400; }
+        .nav-logo-icon { background: #58a6ff; color: #ffffff !important; font-family: monospace; font-size: 0.75rem; font-weight: 700; padding: 3px 7px; border-radius: 4px; letter-spacing: -0.5px; }
         .nav-links { display: flex; gap: 28px; list-style: none; }
         .nav-links a { color: #8b949e; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
         .nav-links a:hover, .nav-links a.active { color: #e6edf3; }
@@ -43,7 +44,7 @@
 <body>
 
 <nav>
-    <a href="/" class="nav-logo">eussec<span>.com</span></a>
+    <a href="/" class="nav-logo"><span class="nav-logo-icon">[&gt;_]</span>eussec</a>
     <ul class="nav-links">
         <li><a href="/" {% if request.path == '/' %}class="active"{% endif %}>Home</a></li>
         <li><a href="/about/" {% if request.path == '/about/' %}class="active"{% endif %}>About</a></li>
