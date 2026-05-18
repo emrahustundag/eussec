@@ -222,6 +222,14 @@ const HASH_PATTERNS = [
     { algo: 'SHA-256 Crypt',    conf: 'high',   desc: 'SHA-256-based Unix password hash.',                              test: h => h.startsWith('$5$') },
     { algo: 'SHA-512 Crypt',    conf: 'high',   desc: 'SHA-512-based Unix password hash (default on Linux).',           test: h => h.startsWith('$6$') },
     { algo: 'Apache MD5',       conf: 'high',   desc: 'Apache web server password hash.',                               test: h => h.startsWith('$apr1$') },
+    // LDAP / directory service formats
+    { algo: 'LDAP SHA-1',       conf: 'high',   desc: 'LDAP/directory SHA-1 hash. Format: {SHA} + Base64.',            test: h => /^\{SHA\}[A-Za-z0-9+/]{27}=$/.test(h) },
+    { algo: 'LDAP SSHA',        conf: 'high',   desc: 'LDAP salted SHA-1. Format: {SSHA} + Base64.',                   test: h => /^\{SSHA\}/.test(h) },
+    { algo: 'LDAP MD5',         conf: 'high',   desc: 'LDAP MD5 hash. Format: {MD5} + Base64.',                        test: h => /^\{MD5\}[A-Za-z0-9+/]{22}==$/.test(h) },
+    { algo: 'LDAP SMD5',        conf: 'high',   desc: 'LDAP salted MD5. Format: {SMD5} + Base64.',                     test: h => /^\{SMD5\}/.test(h) },
+    { algo: 'LDAP SHA-256',     conf: 'high',   desc: 'LDAP SHA-256 hash. Format: {SHA256} + Base64.',                 test: h => /^\{SHA256\}/.test(h) },
+    { algo: 'LDAP SHA-512',     conf: 'high',   desc: 'LDAP SHA-512 hash. Format: {SHA512} + Base64.',                 test: h => /^\{SHA512\}/.test(h) },
+    { algo: 'LDAP CRYPT',       conf: 'high',   desc: 'LDAP Unix crypt wrapper. Format: {CRYPT} + crypt hash.',        test: h => /^\{CRYPT\}/.test(h) },
     { algo: 'MySQL 4.x',        conf: 'high',   desc: 'Old MySQL password hash (deprecated).',                          test: h => /^[0-9a-f]{16}$/i.test(h) },
     { algo: 'MySQL 5.x',        conf: 'high',   desc: 'MySQL password hash starting with *.',                           test: h => /^\*[0-9A-F]{40}$/.test(h) },
     // High confidence — length based
