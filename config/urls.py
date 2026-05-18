@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from checker.views import home, about, tools, blog, check_headers, check_ssl, check_subdomains
+from checker.views import home, about, tools, blog, check_headers, check_ssl, check_subdomains, blog_http_headers
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -11,4 +11,5 @@ urlpatterns = [
     path('tools/ssl/', check_ssl, name='check_ssl'),
     path('tools/subdomains/', check_subdomains, name='check_subdomains'),
     path('blog/', blog, name='blog'),
+    path('blog/http-security-headers/', blog_http_headers, name='blog_http_headers'),
 ]

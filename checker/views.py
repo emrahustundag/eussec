@@ -63,6 +63,10 @@ def blog(request):
     return render(request, 'checker/blog.html')
 
 
+def blog_http_headers(request):
+    return render(request, 'checker/blog_http_headers.html')
+
+
 def check_headers(request):
     results = None
     error = None
