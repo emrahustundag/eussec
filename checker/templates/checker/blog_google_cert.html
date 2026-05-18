@@ -1,0 +1,194 @@
+{% extends 'checker/base.html' %}
+
+{% block title %}Google Cybersecurity Certificate — eussec.com{% endblock %}
+
+{% block extra_css %}
+<style>
+    .post-header { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid #30363d; }
+    .post-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .post-date { color: #484f58; font-size: 0.85rem; }
+    .post-header h1 { font-size: 2rem; color: #e6edf3; line-height: 1.3; margin-bottom: 16px; }
+    .post-header .lead { color: #8b949e; font-size: 1rem; line-height: 1.7; max-width: 680px; }
+
+    .post-body { max-width: 720px; line-height: 1.8; }
+    .post-body h2 { font-size: 1.2rem; color: #e6edf3; margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 1px solid #21262d; }
+    .post-body p { color: #8b949e; margin-bottom: 18px; font-size: 0.95rem; }
+    .post-body strong { color: #c9d1d9; }
+    .post-body a { color: #58a6ff; text-decoration: none; }
+    .post-body a:hover { text-decoration: underline; }
+    .post-body ul { color: #8b949e; font-size: 0.95rem; padding-left: 20px; margin-bottom: 18px; }
+    .post-body ul li { margin-bottom: 8px; line-height: 1.7; }
+
+    .module-block { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 18px 20px; margin: 16px 0; display: flex; gap: 16px; align-items: flex-start; }
+    .module-num { background: #238636; color: #fff; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+    .module-title { color: #e6edf3; font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    .module-desc { color: #8b949e; font-size: 0.85rem; line-height: 1.6; }
+
+    .cert-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px 24px; margin: 24px 0; display: flex; align-items: center; gap: 16px; }
+    .cert-icon { font-size: 2rem; }
+    .cert-name { color: #e6edf3; font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
+    .cert-code { color: #484f58; font-family: monospace; font-size: 0.8rem; }
+
+    .callout { background: #1a2a3a; border-left: 3px solid #58a6ff; border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 24px 0; }
+    .callout p { color: #8b949e; font-size: 0.9rem; margin: 0; }
+    .callout strong { color: #58a6ff; }
+
+    .post-footer { margin-top: 56px; padding-top: 32px; border-top: 1px solid #30363d; }
+    .post-footer p { color: #484f58; font-size: 0.85rem; }
+    .post-footer a { color: #58a6ff; text-decoration: none; }
+
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8b949e; font-size: 0.875rem; text-decoration: none; margin-bottom: 32px; }
+    .back-link:hover { color: #e6edf3; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<a href="/blog/" class="back-link">← Back to Blog</a>
+
+<div class="post-header">
+    <div class="post-meta">
+        <span class="badge badge-green">Cybersecurity</span>
+        <span class="badge badge-blue">Career</span>
+        <span class="post-date">May 18, 2026 · 5 min read</span>
+    </div>
+    <h1>What the Google Cybersecurity Certificate Actually Covers</h1>
+    <p class="lead">
+        Google's Cybersecurity Professional Certificate is one of the most accessible entry points into
+        the field. Here's a breakdown of what the program covers, what's genuinely useful,
+        and what you should build on top of it.
+    </p>
+</div>
+
+<div class="post-body">
+
+    <h2>Why This Certificate?</h2>
+    <p>
+        The Google Cybersecurity Professional Certificate is an 8-course program available on Coursera,
+        designed to prepare beginners for entry-level security analyst roles. It doesn't require
+        a computer science degree or prior experience — just time and consistency.
+    </p>
+    <p>
+        For a software engineering student with a focus on security, it provides a structured
+        foundation in the concepts that matter most: risk management, threat detection, incident response,
+        and the tools used by real security teams.
+    </p>
+
+    <div class="cert-card">
+        <div class="cert-icon">🛡️</div>
+        <div>
+            <div class="cert-name">Google Cybersecurity Professional Certificate</div>
+            <div class="cert-code">Certificate No: CGFKAK3FFLSI · Completed 2026</div>
+        </div>
+    </div>
+
+    <h2>The 8 Courses — What Each One Covers</h2>
+
+    <div class="module-block">
+        <div class="module-num">01</div>
+        <div>
+            <div class="module-title">Foundations of Cybersecurity</div>
+            <div class="module-desc">Introduction to the security landscape — CIA triad (Confidentiality, Integrity, Availability), common attack types, and the history of major breaches. Sets the vocabulary for everything that follows.</div>
+        </div>
+    </div>
+
+    <div class="module-block">
+        <div class="module-num">02</div>
+        <div>
+            <div class="module-title">Play It Safe: Manage Security Risks</div>
+            <div class="module-desc">Risk management frameworks including NIST and ISO 27001. How organizations assess threats, prioritize vulnerabilities, and maintain security posture. Introduces SIEM tools at a conceptual level.</div>
+        </div>
+    </div>
+
+    <div class="module-block">
+        <div class="module-num">03</div>
+        <div>
+            <div class="module-title">Connect and Protect: Networks and Network Security</div>
+            <div class="module-desc">Network fundamentals — TCP/IP, DNS, firewalls, VPNs, and common network-layer attacks. How traffic flows and where attackers target it.</div>
+        </div>
+    </div>
+
+    <div class="module-block">
+        <div class="module-num">04</div>
+        <div>
+            <div class="module-title">Tools of the Trade: Linux and SQL</div>
+            <div class="module-desc">Practical Linux command-line skills for security analysts — navigating the filesystem, permissions, and process management. SQL for querying security logs and databases.</div>
+        </div>
+    </div>
+
+    <div class="module-block">
+        <div class="module-num">05</div>
+        <div>
+            <div class="module-title">Assets, Threats, and Vulnerabilities</div>
+            <div class="module-desc">How to classify assets, identify threats, and assess vulnerabilities. Covers the attack surface, social engineering, and the vulnerability management lifecycle.</div>
+        </div>
+    </div>
+
+    <div class="module-block">
+        <div class="module-num">06</div>
+        <div>
+            <div class="module-title">Sound the Alarm: Detection and Response</div>
+            <div class="module-desc">Incident response lifecycle, alert triage, and log analysis. Hands-on with SIEM tools (Splunk, Chronicle) and IDS/IPS concepts. This is where the practical skills start.</div>
+        </div>
+    </div>
+
+    <div class="module-block">
+        <div class="module-num">07</div>
+        <div>
+            <div class="module-title">Automate Cybersecurity Tasks with Python</div>
+            <div class="module-desc">Using Python to automate repetitive security tasks — parsing logs, checking file integrity, writing basic scripts for analysis. Good foundation for security tooling.</div>
+        </div>
+    </div>
+
+    <div class="module-block">
+        <div class="module-num">08</div>
+        <div>
+            <div class="module-title">Put It to Work: Prepare for Cybersecurity Jobs</div>
+            <div class="module-desc">Career preparation — building a portfolio, understanding SOC roles, and navigating the job market. Less technical, but useful context for what security teams actually look like.</div>
+        </div>
+    </div>
+
+    <h2>What's Genuinely Useful</h2>
+    <p>
+        The strongest parts of the program are <strong>courses 3, 4, and 6</strong>. Network fundamentals
+        and Linux skills are immediately applicable — you use them when analyzing traffic, reading logs,
+        or investigating incidents. The SIEM module gives you a real feel for what security analysts
+        spend most of their time doing.
+    </p>
+    <p>
+        The Python course is a good starting point if you haven't written security scripts before.
+        The concepts — file parsing, log analysis, automation — are directly relevant to building
+        tools like the ones on this site.
+    </p>
+
+    <div class="callout">
+        <p><strong>Key takeaway:</strong> The certificate gives you breadth. You'll understand
+        how all the pieces fit together — risk, networks, detection, response. Depth comes from
+        building things, doing CTFs, and reading incident reports.</p>
+    </div>
+
+    <h2>What to Build on Top of It</h2>
+    <p>
+        A certificate alone won't get you a job. What matters is what you do with it:
+    </p>
+    <ul>
+        <li><strong>Build tools.</strong> Write scripts that automate something security-related. Even a simple header checker or port scanner demonstrates applied knowledge.</li>
+        <li><strong>Do CTFs.</strong> Platforms like HackTheBox, TryHackMe, and PicoCTF put concepts into practice in ways a multiple-choice quiz never can.</li>
+        <li><strong>Read breach reports.</strong> CISA advisories, Google Project Zero write-ups, and post-mortems from real incidents teach you how attacks actually work.</li>
+        <li><strong>Get comfortable with logs.</strong> The majority of security work is reading and querying logs. Practice with real data.</li>
+    </ul>
+
+    <h2>Final Thoughts</h2>
+    <p>
+        The Google Cybersecurity Certificate is a solid starting point — structured, accessible, and
+        broad enough to give you a map of the field. But it's a map, not the territory.
+        The real learning happens when you start building, breaking, and investigating things yourself.
+    </p>
+
+</div>
+
+<div class="post-footer">
+    <p>Written by <a href="/about/">Emrah Ustundag</a> · <a href="/tools/">Explore the Tools →</a></p>
+</div>
+
+{% endblock %}

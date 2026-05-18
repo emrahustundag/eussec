@@ -67,6 +67,10 @@ def blog_http_headers(request):
     return render(request, 'checker/blog_http_headers.html')
 
 
+def blog_google_cert(request):
+    return render(request, 'checker/blog_google_cert.html')
+
+
 def check_headers(request):
     results = None
     error = None
