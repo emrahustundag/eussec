@@ -1,3 +1,4 @@
+import os
 import requests
 import ssl
 import socket
@@ -239,6 +240,55 @@ def check_password(request):
 
 def hash_tool(request):
     return render(request, 'checker/hash_tool.html')
+
+
+def check_ip(request):
+    result = None
+    error = None
+    ip = None
+
+    if request.method == 'POST':
+        ip = request.POST.get('ip', '').strip()
+
+        try:
+            # ipinfo.io — konum ve ISP (API key gerekmez)
+            ipinfo = requests.get(f'https://ipinfo.io/{ip}/json', timeout=8).json()
+
+            # AbuseIPDB
+            abuse_data = None
+            api_key = os.environ.get('ABUSEIPDB_KEY', '')
+            if api_key:
+                abuse_resp = requests.get(
+                    'https://api.abuseipdb.com/api/v2/check',
+                    headers={'Key': api_key, 'Accept': 'application/json'},
+                    params={'ipAddress': ip, 'maxAgeInDays': 90, 'verbose': True},
+                    timeout=8
+                )
+                if abuse_resp.status_code == 200:
+                    abuse_data = abuse_resp.json().get('data', {})
+
+            if 'error' in ipinfo:
+                error = f"Invalid IP address: {ip}"
+            else:
+                result = {
+                    'ip': ip,
+                    'hostname': ipinfo.get('hostname', '—'),
+                    'city': ipinfo.get('city', '—'),
+                    'region': ipinfo.get('region', '—'),
+                    'country': ipinfo.get('country', '—'),
+                    'org': ipinfo.get('org', '—'),
+                    'timezone': ipinfo.get('timezone', '—'),
+                    'abuse': abuse_data,
+                }
+
+        except Exception as e:
+            error = f'Could not retrieve information: {str(e)}'
+
+    return render(request, 'checker/ip_checker.html', {
+        'result': result,
+        'error': error,
+        'ip': ip,
+    })
 
 
 def check_subdomains(request):

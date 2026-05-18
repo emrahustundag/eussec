@@ -1,0 +1,147 @@
+{% extends 'checker/base.html' %}
+
+{% block title %}IP Reputation Checker — eussec.com{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header { margin-bottom: 32px; }
+    .page-header h2 { font-size: 1.8rem; color: #e6edf3; margin-bottom: 8px; }
+    .page-header p { color: #8b949e; }
+
+    .form-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 28px; margin-bottom: 32px; }
+    .input-row { display: flex; gap: 12px; }
+    .input-row input { flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px 16px; color: #c9d1d9; font-size: 1rem; outline: none; transition: border-color 0.2s; font-family: monospace; }
+    .input-row input:focus { border-color: #58a6ff; }
+    .input-row button { background: #238636; color: #fff; border: none; border-radius: 6px; padding: 12px 24px; font-size: 1rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+    .input-row button:hover { background: #2ea043; }
+
+    .error { background: #3d1c1c; border: 1px solid #f85149; border-radius: 8px; padding: 14px 18px; color: #f85149; margin-bottom: 24px; }
+
+    /* Verdict banner */
+    .verdict { border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+    .verdict.clean  { background: #0d2b12; border: 1px solid #238636; }
+    .verdict.danger { background: #2d0f0f; border: 1px solid #f85149; }
+    .verdict.warn   { background: #2d1f04; border: 1px solid #d29922; }
+    .verdict-icon { font-size: 2rem; }
+    .verdict-text h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+    .verdict.clean  .verdict-text h3 { color: #3fb950; }
+    .verdict.danger .verdict-text h3 { color: #f85149; }
+    .verdict.warn   .verdict-text h3 { color: #d29922; }
+    .verdict-text p { color: #8b949e; font-size: 0.87rem; }
+
+    /* Info grid */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .info-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; }
+    .info-card h4 { color: #8b949e; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #21262d; font-size: 0.88rem; gap: 12px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: #8b949e; white-space: nowrap; }
+    .info-value { color: #c9d1d9; text-align: right; word-break: break-all; }
+
+    /* Abuse score */
+    .abuse-score { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .score-big { font-size: 3rem; font-weight: 800; line-height: 1; }
+    .score-big.green { color: #3fb950; }
+    .score-big.yellow { color: #d29922; }
+    .score-big.red { color: #f85149; }
+    .score-meta { color: #8b949e; font-size: 0.85rem; }
+    .score-meta strong { color: #c9d1d9; display: block; font-size: 1rem; margin-bottom: 2px; }
+
+    .abuse-bar-bg { background: #21262d; border-radius: 99px; height: 6px; margin-bottom: 16px; }
+    .abuse-bar { height: 100%; border-radius: 99px; transition: width 0.5s; }
+
+    @media (max-width: 640px) {
+        .info-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>🔎 IP Reputation Checker</h2>
+    <p>Check if an IP address has been reported for malicious activity.</p>
+</div>
+
+<div class="form-card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="input-row">
+            <input type="text" name="ip" value="{{ ip|default:'' }}" placeholder="e.g. 8.8.8.8" autocomplete="off" spellcheck="false">
+            <button type="submit">Check</button>
+        </div>
+    </form>
+</div>
+
+{% if error %}
+    <div class="error">{{ error }}</div>
+{% endif %}
+
+{% if result %}
+
+    {% if result.abuse %}
+        {% with s=result.abuse.abuseConfidenceScore %}
+        <div class="verdict {% if s == 0 %}clean{% elif s < 50 %}warn{% else %}danger{% endif %}">
+            <div class="verdict-icon">
+                {% if s == 0 %}✅{% elif s < 50 %}⚠️{% else %}🚨{% endif %}
+            </div>
+            <div class="verdict-text">
+                <h3>
+                    {% if s == 0 %}Clean — No abuse reports{% elif s < 50 %}Suspicious — Low abuse score{% else %}Dangerous — High abuse score{% endif %}
+                </h3>
+                <p>Abuse confidence score: {{ s }}% · Based on reports from the last 90 days</p>
+            </div>
+        </div>
+        {% endwith %}
+    {% endif %}
+
+    <div class="info-grid">
+
+        <!-- Location -->
+        <div class="info-card">
+            <h4>📍 Location & Network</h4>
+            <div class="info-row"><span class="info-label">IP</span><span class="info-value">{{ result.ip }}</span></div>
+            <div class="info-row"><span class="info-label">Hostname</span><span class="info-value">{{ result.hostname }}</span></div>
+            <div class="info-row"><span class="info-label">City</span><span class="info-value">{{ result.city }}</span></div>
+            <div class="info-row"><span class="info-label">Region</span><span class="info-value">{{ result.region }}</span></div>
+            <div class="info-row"><span class="info-label">Country</span><span class="info-value">{{ result.country }}</span></div>
+            <div class="info-row"><span class="info-label">ISP / Org</span><span class="info-value">{{ result.org }}</span></div>
+            <div class="info-row"><span class="info-label">Timezone</span><span class="info-value">{{ result.timezone }}</span></div>
+        </div>
+
+        <!-- AbuseIPDB -->
+        {% if result.abuse %}
+        <div class="info-card">
+            <h4>🛡️ AbuseIPDB Report</h4>
+            {% with a=result.abuse %}
+            {% with s=a.abuseConfidenceScore %}
+            <div class="abuse-score">
+                <div class="score-big {% if s == 0 %}green{% elif s < 50 %}yellow{% else %}red{% endif %}">{{ s }}%</div>
+                <div class="score-meta">
+                    <strong>Abuse Confidence</strong>
+                    {{ a.totalReports }} total report{{ a.totalReports|pluralize }}
+                </div>
+            </div>
+            <div class="abuse-bar-bg">
+                <div class="abuse-bar" style="width:{{ s }}%; background:{% if s == 0 %}#3fb950{% elif s < 50 %}#d29922{% else %}#f85149{% endif %};"></div>
+            </div>
+            {% endwith %}
+            <div class="info-row"><span class="info-label">Usage Type</span><span class="info-value">{{ a.usageType|default:"—" }}</span></div>
+            <div class="info-row"><span class="info-label">ISP</span><span class="info-value">{{ a.isp|default:"—" }}</span></div>
+            <div class="info-row"><span class="info-label">Domain</span><span class="info-value">{{ a.domain|default:"—" }}</span></div>
+            <div class="info-row"><span class="info-label">Tor Exit Node</span><span class="info-value">{% if a.isTor %}⚠️ Yes{% else %}No{% endif %}</span></div>
+            <div class="info-row"><span class="info-label">Last Reported</span><span class="info-value">{{ a.lastReportedAt|default:"Never"|slice:":10" }}</span></div>
+            {% endwith %}
+        </div>
+        {% else %}
+        <div class="info-card">
+            <h4>🛡️ AbuseIPDB Report</h4>
+            <p style="color:#8b949e; font-size:0.87rem; margin-top:8px;">AbuseIPDB API key not configured.</p>
+        </div>
+        {% endif %}
+
+    </div>
+
+{% endif %}
+
+{% endblock %}
