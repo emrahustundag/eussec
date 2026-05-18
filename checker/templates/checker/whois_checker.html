@@ -1,0 +1,140 @@
+{% extends 'checker/base.html' %}
+
+{% block title %}WHOIS & DNS Lookup — eussec.com{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tool-header { margin-bottom: 40px; }
+    .tool-header h1 { font-size: 1.8rem; color: #e6edf3; margin-bottom: 8px; }
+    .tool-header p { color: #8b949e; font-size: 0.95rem; }
+
+    .input-row { display: flex; gap: 12px; margin-bottom: 32px; }
+    .input-row input {
+        flex: 1; background: #161b22; border: 1px solid #30363d; border-radius: 6px;
+        padding: 10px 16px; color: #e6edf3; font-size: 0.95rem; outline: none;
+    }
+    .input-row input:focus { border-color: #58a6ff; }
+    .input-row input::placeholder { color: #484f58; }
+
+    .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 8px; }
+    @media (max-width: 640px) { .results-grid { grid-template-columns: 1fr; } }
+
+    .section-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px 24px; }
+    .section-card h2 { color: #e6edf3; font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #21262d; }
+
+    .info-row { display: flex; flex-direction: column; gap: 2px; padding: 10px 0; border-bottom: 1px solid #21262d; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: #484f58; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-value { color: #e6edf3; font-size: 0.88rem; font-family: monospace; word-break: break-all; }
+    .info-value.muted { color: #8b949e; }
+
+    .dns-record { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid #21262d; align-items: flex-start; }
+    .dns-record:last-child { border-bottom: none; }
+    .dns-type { min-width: 48px; }
+    .dns-value { color: #8b949e; font-family: monospace; font-size: 0.82rem; word-break: break-all; }
+
+    .domain-header { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+    .domain-name { color: #58a6ff; font-size: 1.1rem; font-weight: 700; font-family: monospace; }
+
+    .error-box { background: #3d1c1c; border: 1px solid #f85149; border-radius: 8px; padding: 14px 18px; color: #f85149; font-size: 0.9rem; margin-bottom: 24px; }
+
+    .full-width { grid-column: 1 / -1; }
+    .status-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .status-tag { background: #1a2a3a; color: #58a6ff; font-size: 0.72rem; padding: 2px 8px; border-radius: 10px; font-family: monospace; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="tool-header">
+    <h1>WHOIS & DNS Lookup</h1>
+    <p>Retrieve registration details and DNS records for any domain.</p>
+</div>
+
+<form method="POST">
+    {% csrf_token %}
+    <div class="input-row">
+        <input
+            type="text"
+            name="domain"
+            placeholder="example.com"
+            value="{{ domain|default:'' }}"
+            autocomplete="off"
+            spellcheck="false"
+        >
+        <button type="submit" class="btn btn-primary">Lookup →</button>
+    </div>
+</form>
+
+{% if error %}
+    <div class="error-box">⚠ {{ error }}</div>
+{% endif %}
+
+{% if result %}
+    <div class="domain-header">
+        <div class="domain-name">{{ result.domain }}</div>
+        <span class="badge badge-green">Found</span>
+    </div>
+
+    <div class="results-grid">
+
+        <!-- WHOIS -->
+        <div class="section-card">
+            <h2>🔍 WHOIS</h2>
+            <div class="info-row">
+                <div class="info-label">Registrar</div>
+                <div class="info-value {% if not result.registrar %}muted{% endif %}">{{ result.registrar|default:"—" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Created</div>
+                <div class="info-value {% if not result.creation_date %}muted{% endif %}">{{ result.creation_date|default:"—" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Expires</div>
+                <div class="info-value {% if not result.expiration_date %}muted{% endif %}">{{ result.expiration_date|default:"—" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Updated</div>
+                <div class="info-value {% if not result.updated_date %}muted{% endif %}">{{ result.updated_date|default:"—" }}</div>
+            </div>
+            {% if result.name_servers %}
+            <div class="info-row">
+                <div class="info-label">Name Servers</div>
+                {% for ns in result.name_servers %}
+                    <div class="info-value">{{ ns }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if result.status %}
+            <div class="info-row">
+                <div class="info-label">Status</div>
+                <div class="status-list" style="margin-top:4px;">
+                    {% for s in result.status %}
+                        <span class="status-tag">{{ s|truncatechars:40 }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- DNS -->
+        <div class="section-card">
+            <h2>🌐 DNS Records</h2>
+            {% if result.dns %}
+                {% for rtype, records in result.dns.items %}
+                    {% for record in records %}
+                    <div class="dns-record">
+                        <div class="dns-type"><span class="badge badge-blue">{{ rtype }}</span></div>
+                        <div class="dns-value">{{ record }}</div>
+                    </div>
+                    {% endfor %}
+                {% endfor %}
+            {% else %}
+                <div style="color:#484f58; font-size:0.88rem;">No DNS records found.</div>
+            {% endif %}
+        </div>
+
+    </div>
+{% endif %}
+
+{% endblock %}

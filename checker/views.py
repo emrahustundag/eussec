@@ -1,6 +1,8 @@
 import requests
 import ssl
 import socket
+import whois
+import dns.resolver
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.shortcuts import render
@@ -73,6 +75,56 @@ def blog_google_cert(request):
 
 def blog_flipper_subghz(request):
     return render(request, 'checker/blog_flipper_subghz.html')
+
+
+def check_whois(request):
+    result = None
+    error = None
+    domain = None
+
+    if request.method == 'POST':
+        domain = request.POST.get('domain', '').strip()
+        domain = domain.replace('https://', '').replace('http://', '').split('/')[0]
+
+        try:
+            # WHOIS
+            w = whois.whois(domain)
+
+            # DNS
+            dns_records = {}
+            for record_type in ['A', 'MX', 'TXT', 'NS', 'CNAME']:
+                try:
+                    answers = dns.resolver.resolve(domain, record_type, lifetime=5)
+                    dns_records[record_type] = [str(r) for r in answers]
+                except Exception:
+                    pass
+
+            def fmt_date(d):
+                if isinstance(d, list):
+                    d = d[0]
+                if hasattr(d, 'strftime'):
+                    return d.strftime('%Y-%m-%d')
+                return str(d)[:10] if d else None
+
+            result = {
+                'domain': domain,
+                'registrar': w.registrar,
+                'creation_date': fmt_date(w.creation_date),
+                'expiration_date': fmt_date(w.expiration_date),
+                'updated_date': fmt_date(w.updated_date),
+                'name_servers': list(set([ns.lower() for ns in w.name_servers])) if w.name_servers else [],
+                'status': w.status if isinstance(w.status, list) else [w.status] if w.status else [],
+                'dns': dns_records,
+            }
+
+        except Exception as e:
+            error = f'Could not retrieve information for this domain: {str(e)}'
+
+    return render(request, 'checker/whois_checker.html', {
+        'result': result,
+        'error': error,
+        'domain': domain,
+    })
 
 
 def check_headers(request):

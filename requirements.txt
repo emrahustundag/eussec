@@ -2,3 +2,5 @@ django==6.0.5
 requests==2.34.0
 gunicorn==23.0.0
 whitenoise==6.9.0
+python-whois==0.9.6
+dnspython==2.8.0
