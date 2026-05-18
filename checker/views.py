@@ -237,6 +237,10 @@ def check_password(request):
     return render(request, 'checker/password_checker.html')
 
 
+def hash_tool(request):
+    return render(request, 'checker/hash_tool.html')
+
+
 def check_subdomains(request):
     results = None
     error = None
