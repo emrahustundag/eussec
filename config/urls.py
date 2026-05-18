@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from checker.views import home, about, tools, blog, check_headers, check_ssl, check_subdomains, blog_http_headers, blog_google_cert
+from checker.views import home, about, tools, blog, check_headers, check_ssl, check_subdomains, blog_http_headers, blog_google_cert, blog_flipper_subghz
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -13,4 +13,5 @@ urlpatterns = [
     path('blog/', blog, name='blog'),
     path('blog/http-security-headers/', blog_http_headers, name='blog_http_headers'),
     path('blog/google-cybersecurity-certificate/', blog_google_cert, name='blog_google_cert'),
+    path('blog/flipper-zero-car-key-signal/', blog_flipper_subghz, name='blog_flipper_subghz'),
 ]

@@ -1,0 +1,257 @@
+{% extends 'checker/base.html' %}
+{% load static %}
+
+{% block title %}Capturing a Car Key Signal with Flipper Zero — eussec.com{% endblock %}
+
+{% block extra_css %}
+<style>
+    .post-header { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid #30363d; }
+    .post-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .post-date { color: #484f58; font-size: 0.85rem; }
+    .post-header h1 { font-size: 2rem; color: #e6edf3; line-height: 1.3; margin-bottom: 16px; }
+    .post-header .lead { color: #8b949e; font-size: 1rem; line-height: 1.7; max-width: 680px; }
+
+    .post-body { max-width: 720px; line-height: 1.8; }
+    .post-body h2 { font-size: 1.2rem; color: #e6edf3; margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 1px solid #21262d; }
+    .post-body p { color: #8b949e; margin-bottom: 18px; font-size: 0.95rem; }
+    .post-body strong { color: #c9d1d9; }
+    .post-body a { color: #58a6ff; text-decoration: none; }
+    .post-body a:hover { text-decoration: underline; }
+    .post-body ul { color: #8b949e; font-size: 0.95rem; padding-left: 20px; margin-bottom: 18px; }
+    .post-body ul li { margin-bottom: 8px; line-height: 1.7; }
+
+    .code-block { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px 20px; margin: 20px 0; font-family: monospace; font-size: 0.82rem; color: #3fb950; overflow-x: auto; line-height: 1.7; white-space: pre; }
+
+    .signal-img { width: 100%; border-radius: 8px; border: 1px solid #30363d; margin: 24px 0; }
+    .img-caption { color: #484f58; font-size: 0.8rem; text-align: center; margin-top: -16px; margin-bottom: 24px; }
+
+    .info-block { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 18px 20px; margin: 20px 0; }
+    .info-block .label { color: #8b949e; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .info-block .value { color: #58a6ff; font-family: monospace; font-size: 0.95rem; }
+
+    .callout { background: #1a2a3a; border-left: 3px solid #58a6ff; border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 24px 0; }
+    .callout p { color: #8b949e; font-size: 0.9rem; margin: 0; }
+    .callout strong { color: #58a6ff; }
+
+    .warning { background: #3a2f0a; border-left: 3px solid #d29922; border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 24px 0; }
+    .warning p { color: #8b949e; font-size: 0.9rem; margin: 0; }
+    .warning strong { color: #d29922; }
+
+    .post-footer { margin-top: 56px; padding-top: 32px; border-top: 1px solid #30363d; }
+    .post-footer p { color: #484f58; font-size: 0.85rem; }
+    .post-footer a { color: #58a6ff; text-decoration: none; }
+
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #8b949e; font-size: 0.875rem; text-decoration: none; margin-bottom: 32px; }
+    .back-link:hover { color: #e6edf3; }
+
+    .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+    @media (max-width: 640px) { .spec-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<a href="/blog/" class="back-link">← Back to Blog</a>
+
+<div class="post-header">
+    <div class="post-meta">
+        <span class="badge badge-green">Hardware</span>
+        <span class="badge badge-orange">Sub-GHz</span>
+        <span class="badge badge-blue">Python</span>
+        <span class="post-date">May 18, 2026 · 7 min read</span>
+    </div>
+    <h1>Capturing a Car Key Signal with Flipper Zero — and Visualizing It with Python</h1>
+    <p class="lead">
+        Modern car keys communicate over Sub-GHz radio frequencies using rolling codes.
+        Here's how I used a Flipper Zero to capture the raw signal, read it programmatically
+        via USB serial, and visualize the pulse data with Python — without ever decoding the key.
+    </p>
+</div>
+
+<div class="post-body">
+
+    <h2>Background: How Car Keys Work</h2>
+    <p>
+        Most modern car keys use <strong>Sub-GHz radio frequencies</strong> — typically 433 MHz or 868 MHz
+        depending on the region — to communicate with the vehicle. When you press the unlock button,
+        the key transmits a short burst of radio signal that the car's receiver decodes.
+    </p>
+    <p>
+        The critical security mechanism is <strong>rolling code</strong> (also called hopping code).
+        Instead of sending the same signal every time, the key and car share a synchronized counter.
+        Each button press generates a new, unique code derived from that counter.
+        Even if an attacker captures the signal, replaying it won't work —
+        the car has already moved to the next code in the sequence.
+    </p>
+
+    <div class="callout">
+        <p><strong>Rolling code:</strong> Each key press generates a cryptographically unique signal.
+        Replay attacks don't work — the car rejects any previously used code.</p>
+    </div>
+
+    <h2>Equipment and Setup</h2>
+    <p>
+        The setup is straightforward:
+    </p>
+    <ul>
+        <li><strong>Flipper Zero</strong> — multi-tool for radio, NFC, IR, and hardware hacking</li>
+        <li><strong>USB cable</strong> — connects Flipper to the computer for serial communication</li>
+        <li><strong>Python 3.12</strong> with <code>pyserial</code> and <code>matplotlib</code></li>
+        <li><strong>A car key</strong> — used on my own vehicle, for research purposes only</li>
+    </ul>
+
+    <div class="warning">
+        <p><strong>Important:</strong> Only capture signals from devices you own.
+        Intercepting radio communications without authorization is illegal in most jurisdictions.</p>
+    </div>
+
+    <h2>Step 1: Finding the Frequency</h2>
+    <p>
+        The first step is identifying which frequency the key uses. Flipper Zero has a built-in
+        <strong>Frequency Analyzer</strong> under Sub-GHz — it scans the spectrum in real time
+        and shows signal strength at each frequency.
+    </p>
+    <p>
+        With the Frequency Analyzer running, I pressed the car key button.
+        The analyzer immediately showed a strong signal at <strong>440.17 MHz</strong>.
+        This is slightly above the standard 433.92 MHz — the exact frequency varies by manufacturer.
+    </p>
+
+    <div class="spec-grid">
+        <div class="info-block">
+            <div class="label">Detected Frequency</div>
+            <div class="value">440.175 MHz</div>
+        </div>
+        <div class="info-block">
+            <div class="label">Modulation</div>
+            <div class="value">OOK650 (AM)</div>
+        </div>
+        <div class="info-block">
+            <div class="label">Protocol</div>
+            <div class="value">RAW (rolling code)</div>
+        </div>
+        <div class="info-block">
+            <div class="label">Samples captured</div>
+            <div class="value">928 samples</div>
+        </div>
+    </div>
+
+    <h2>Step 2: Capturing the Raw Signal</h2>
+    <p>
+        With the frequency known, I used Flipper's <strong>Sub-GHz → Read RAW</strong> mode
+        to capture the signal. Unlike the standard Read mode — which tries to decode known protocols —
+        Raw mode records the exact sequence of pulse durations without interpretation.
+    </p>
+    <p>
+        This is important for rolling code signals: Flipper can't decode them (by design),
+        but it can record the raw waveform. The captured file is saved in Flipper's
+        <code>.sub</code> format on the SD card.
+    </p>
+
+    <h2>Step 3: Reading the File via Python</h2>
+    <p>
+        Flipper Zero exposes a serial CLI over USB. Using <code>pyserial</code>,
+        I connected directly to the device and read the saved <code>.sub</code> file:
+    </p>
+
+    <div class="code-block">import serial
+import time
+
+ser = serial.Serial('/dev/cu.usbmodemflip_Ridiroc1', 115200, timeout=2)
+time.sleep(0.5)
+
+ser.write(b'storage read /ext/subghz/Xxyy.sub\r\n')
+time.sleep(2)
+response = ser.read(4096).decode('utf-8', errors='ignore')
+print(response)
+ser.close()</div>
+
+    <p>
+        The output contains the raw signal data in Flipper's format:
+    </p>
+
+    <div class="code-block">Filetype: Flipper SubGhz RAW File
+Version: 1
+Frequency: 440175000
+Preset: FuriHalSubGhzPresetOok650Async
+Protocol: RAW
+RAW_Data: 1224 -210706 99 -220660 41773 -71436 13221 -1802 ...</div>
+
+    <p>
+        Each number in <code>RAW_Data</code> represents a pulse duration in microseconds.
+        <strong>Positive values</strong> are periods when the signal is ON (carrier present),
+        <strong>negative values</strong> are periods when the signal is OFF (silence).
+        This is the fundamental structure of OOK (On-Off Keying) modulation.
+    </p>
+
+    <h2>Step 4: Visualizing the Signal</h2>
+    <p>
+        With the raw pulse data, I built a time-domain visualization using <code>matplotlib</code>.
+        Each value is converted into a step in the waveform — positive values raise the signal to 1,
+        negative values drop it to 0:
+    </p>
+
+    <div class="code-block">values = list(map(int, raw_data.strip().split()))
+
+x, y = [], []
+current_time = 0
+
+for v in values:
+    duration = abs(v)
+    level = 1 if v > 0 else 0
+    x.append(current_time)
+    y.append(level)
+    current_time += duration
+    x.append(current_time)
+    y.append(level)
+
+plt.step(x, y, where='post', color='#58a6ff')
+plt.fill_between(x, y, step='post', alpha=0.3)</div>
+
+    <img src="{% static 'checker/img/car_key_signal.png' %}" alt="Car key Sub-GHz signal visualization" class="signal-img">
+    <div class="img-caption">Captured car key signal at 440.175 MHz — first 500ms of the recording</div>
+
+    <h2>Reading the Signal</h2>
+    <p>
+        The visualization reveals the structure of the transmission:
+    </p>
+    <ul>
+        <li><strong>~0μs:</strong> Short preamble pulse — signals the start of transmission</li>
+        <li><strong>~210,000μs:</strong> Second sync pulse after a long silence</li>
+        <li><strong>~400,000μs onward:</strong> The main data block — the actual rolling code payload</li>
+    </ul>
+    <p>
+        The long silence between pulses (~200ms gaps) is typical of rolling code systems.
+        The preamble and sync pulses help the car's receiver synchronize before the actual
+        data arrives. The data block itself encodes the rolling code — a value that changes
+        with every button press.
+    </p>
+
+    <h2>Why Rolling Code Can't Be Replayed</h2>
+    <p>
+        Even though we captured the exact waveform, sending it back to the car would fail.
+        The car maintains an internal counter in sync with the key. When it receives a signal,
+        it checks: "Is this code within the expected range of my current counter?"
+        If the code has already been used — or is too far ahead — it's rejected.
+    </p>
+    <p>
+        More sophisticated attacks like <strong>RollJam</strong> (by Samy Kamkar) exist —
+        they simultaneously jam and capture two consecutive codes, then replay the first one
+        while the car never received it. But that's a different story.
+    </p>
+
+    <h2>Takeaways</h2>
+    <ul>
+        <li>Sub-GHz signals are easy to capture — even cheap hardware does it</li>
+        <li>Rolling code makes replay attacks impractical for standard keyless entry</li>
+        <li>The Flipper Zero CLI over USB is powerful for programmatic signal analysis</li>
+        <li>Raw signal visualization reveals the structure of OOK transmissions</li>
+    </ul>
+
+</div>
+
+<div class="post-footer">
+    <p>Written by <a href="/about/">Emrah Ustundag</a> · <a href="/tools/">Explore the Tools →</a></p>
+</div>
+
+{% endblock %}

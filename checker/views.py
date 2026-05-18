@@ -71,6 +71,10 @@ def blog_google_cert(request):
     return render(request, 'checker/blog_google_cert.html')
 
 
+def blog_flipper_subghz(request):
+    return render(request, 'checker/blog_flipper_subghz.html')
+
+
 def check_headers(request):
     results = None
     error = None
