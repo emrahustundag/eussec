@@ -233,6 +233,10 @@ def resolve_subdomain(subdomain, domain):
         return None
 
 
+def check_password(request):
+    return render(request, 'checker/password_checker.html')
+
+
 def check_subdomains(request):
     results = None
     error = None
