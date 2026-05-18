@@ -2,7 +2,22 @@ import requests
 import ssl
 import socket
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.shortcuts import render
+
+SUBDOMAIN_WORDLIST = [
+    'www', 'mail', 'ftp', 'smtp', 'pop', 'imap', 'webmail', 'email',
+    'admin', 'administrator', 'panel', 'dashboard', 'cpanel', 'whm',
+    'api', 'app', 'apps', 'dev', 'development', 'staging', 'beta', 'test',
+    'blog', 'news', 'forum', 'wiki', 'docs', 'help', 'support', 'status',
+    'shop', 'store', 'portal', 'login', 'auth', 'secure', 'account',
+    'cdn', 'static', 'assets', 'media', 'img', 'images', 'video',
+    'ns1', 'ns2', 'ns3', 'mx', 'mx1', 'mx2',
+    'remote', 'vpn', 'cloud', 'server', 'host', 'web', 'web1', 'web2',
+    'git', 'gitlab', 'github', 'ci', 'jenkins', 'jira', 'monitor',
+    'm', 'mobile', 'wap', 'api2', 'v1', 'v2', 'old', 'new', 'prod',
+    'autodiscover', 'autoconfig', 'webdisk', 'calendar', 'chat',
+]
 
 HEADERS_INFO = {
     'Strict-Transport-Security': {
@@ -142,4 +157,57 @@ def check_ssl(request):
         'result': result,
         'error': error,
         'domain': domain,
+    })
+
+
+def resolve_subdomain(subdomain, domain):
+    full = f'{subdomain}.{domain}'
+    try:
+        ip = socket.gethostbyname(full)
+        return {'subdomain': full, 'ip': ip}
+    except socket.gaierror:
+        return None
+
+
+def check_subdomains(request):
+    results = None
+    error = None
+    domain = None
+    found_count = 0
+
+    if request.method == 'POST':
+        domain = request.POST.get('domain', '').strip()
+        domain = domain.replace('https://', '').replace('http://', '').split('/')[0]
+
+        try:
+            socket.gethostbyname(domain)
+        except socket.gaierror:
+            error = 'Domain not found. Please check the domain name.'
+            return render(request, 'checker/subdomain_checker.html', {
+                'results': results, 'error': error, 'domain': domain, 'found_count': found_count,
+            })
+
+        try:
+            found = []
+            with ThreadPoolExecutor(max_workers=20) as executor:
+                futures = {
+                    executor.submit(resolve_subdomain, sub, domain): sub
+                    for sub in SUBDOMAIN_WORDLIST
+                }
+                for future in as_completed(futures):
+                    res = future.result()
+                    if res:
+                        found.append(res)
+
+            results = sorted(found, key=lambda x: x['subdomain'])
+            found_count = len(results)
+
+        except Exception as e:
+            error = f'An error occurred: {str(e)}'
+
+    return render(request, 'checker/subdomain_checker.html', {
+        'results': results,
+        'error': error,
+        'domain': domain,
+        'found_count': found_count,
     })

@@ -1,0 +1,124 @@
+{% extends 'checker/base.html' %}
+
+{% block title %}Subdomain Enumerator — eussec.com{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tool-header { margin-bottom: 40px; }
+    .tool-header h1 { font-size: 1.8rem; color: #e6edf3; margin-bottom: 8px; }
+    .tool-header p { color: #8b949e; font-size: 0.95rem; }
+
+    .input-row { display: flex; gap: 12px; margin-bottom: 32px; }
+    .input-row input {
+        flex: 1; background: #161b22; border: 1px solid #30363d; border-radius: 6px;
+        padding: 10px 16px; color: #e6edf3; font-size: 0.95rem; outline: none;
+    }
+    .input-row input:focus { border-color: #58a6ff; }
+    .input-row input::placeholder { color: #484f58; }
+
+    .summary-bar {
+        display: flex; align-items: center; gap: 16px;
+        background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+        padding: 16px 20px; margin-bottom: 24px;
+    }
+    .summary-domain { color: #58a6ff; font-weight: 600; font-size: 1rem; }
+    .summary-count { color: #3fb950; font-weight: 700; font-size: 1.1rem; }
+    .summary-label { color: #8b949e; font-size: 0.85rem; }
+
+    .result-table { width: 100%; border-collapse: collapse; }
+    .result-table th {
+        text-align: left; color: #8b949e; font-size: 0.8rem; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.5px;
+        padding: 10px 16px; border-bottom: 1px solid #30363d;
+    }
+    .result-table td {
+        padding: 12px 16px; border-bottom: 1px solid #21262d;
+        font-size: 0.9rem;
+    }
+    .result-table tr:last-child td { border-bottom: none; }
+    .result-table tr:hover td { background: #161b22; }
+    .subdomain-name { color: #58a6ff; font-family: monospace; }
+    .ip-addr { color: #8b949e; font-family: monospace; font-size: 0.85rem; }
+
+    .empty-state { text-align: center; padding: 48px 24px; color: #484f58; }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.95rem; }
+
+    .error-box {
+        background: #3d1c1c; border: 1px solid #f85149; border-radius: 8px;
+        padding: 14px 18px; color: #f85149; font-size: 0.9rem; margin-bottom: 24px;
+    }
+
+    .wordlist-info {
+        color: #484f58; font-size: 0.8rem; margin-top: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="tool-header">
+    <h1>Subdomain Enumerator</h1>
+    <p>Discover subdomains of any domain using DNS resolution.</p>
+</div>
+
+<form method="POST">
+    {% csrf_token %}
+    <div class="input-row">
+        <input
+            type="text"
+            name="domain"
+            placeholder="example.com"
+            value="{{ domain|default:'' }}"
+            autocomplete="off"
+            spellcheck="false"
+        >
+        <button type="submit" class="btn btn-primary">Enumerate →</button>
+    </div>
+    <div class="wordlist-info">Checks {{ wordlist_size|default:"50" }} common subdomain prefixes via DNS resolution.</div>
+</form>
+
+{% if error %}
+    <div class="error-box">⚠ {{ error }}</div>
+{% endif %}
+
+{% if results is not None %}
+    <div class="summary-bar">
+        <div>
+            <div class="summary-domain">{{ domain }}</div>
+            <div class="summary-label">target domain</div>
+        </div>
+        <div style="margin-left: auto; text-align: right;">
+            <div class="summary-count">{{ found_count }} found</div>
+            <div class="summary-label">active subdomains</div>
+        </div>
+    </div>
+
+    {% if results %}
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>Subdomain</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in results %}
+                    <tr>
+                        <td class="subdomain-name">{{ item.subdomain }}</td>
+                        <td class="ip-addr">{{ item.ip }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="icon">🔍</div>
+            <p>No subdomains found for <strong style="color:#e6edf3;">{{ domain }}</strong>.</p>
+        </div>
+    {% endif %}
+{% endif %}
+
+{% endblock %}
