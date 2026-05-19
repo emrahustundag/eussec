@@ -107,6 +107,10 @@ def check_whois(request):
             error = 'Invalid domain name. Only letters, numbers, dots and hyphens are allowed.'
             return render(request, 'checker/whois_checker.html', {'result': None, 'error': error, 'domain': domain})
 
+        if is_private_host(domain):
+            error = 'Requests to internal/private network addresses are not allowed.'
+            return render(request, 'checker/whois_checker.html', {'result': None, 'error': error, 'domain': domain})
+
         try:
             # WHOIS
             w = whois.whois(domain)
