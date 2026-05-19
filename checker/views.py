@@ -1,4 +1,5 @@
 import os
+import ipaddress
 import requests
 import ssl
 import socket
@@ -7,6 +8,15 @@ import dns.resolver
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.shortcuts import render
+
+
+def is_private_host(hostname):
+    """Returns True if the hostname resolves to a private/internal IP."""
+    try:
+        ip = socket.gethostbyname(hostname)
+        return ipaddress.ip_address(ip).is_private
+    except Exception:
+        return False
 
 SUBDOMAIN_WORDLIST = [
     'www', 'mail', 'ftp', 'smtp', 'pop', 'imap', 'webmail', 'email',
@@ -140,6 +150,12 @@ def check_headers(request):
             url = 'https://' + url
 
         try:
+            from urllib.parse import urlparse
+            hostname = urlparse(url).hostname or ''
+            if is_private_host(hostname):
+                error = 'Requests to internal/private network addresses are not allowed.'
+                return render(request, 'checker/header_checker.html', {'results': None, 'error': error, 'url': url, 'score': None})
+
             response = requests.get(url, timeout=10, allow_redirects=True)
             headers = {k.lower(): v for k, v in response.headers.items()}
 
@@ -184,6 +200,10 @@ def check_ssl(request):
         domain = domain.replace('https://', '').replace('http://', '').split('/')[0]
 
         try:
+            if is_private_host(domain):
+                error = 'Requests to internal/private network addresses are not allowed.'
+                return render(request, 'checker/ssl_checker.html', {'result': None, 'error': error, 'domain': domain})
+
             context = ssl.create_default_context()
             with socket.create_connection((domain, 443), timeout=10) as sock:
                 with context.wrap_socket(sock, server_hostname=domain) as ssock:
@@ -300,6 +320,12 @@ def check_subdomains(request):
     if request.method == 'POST':
         domain = request.POST.get('domain', '').strip()
         domain = domain.replace('https://', '').replace('http://', '').split('/')[0]
+
+        if is_private_host(domain):
+            error = 'Requests to internal/private network addresses are not allowed.'
+            return render(request, 'checker/subdomain_checker.html', {
+                'results': None, 'error': error, 'domain': domain, 'found_count': 0,
+            })
 
         try:
             socket.gethostbyname(domain)
