@@ -1,4 +1,5 @@
 import os
+import re
 import ipaddress
 import requests
 import ssl
@@ -8,6 +9,11 @@ import dns.resolver
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.shortcuts import render
+
+
+def is_valid_domain(domain):
+    """Sadece geçerli domain karakterlerine izin ver."""
+    return bool(re.match(r'^[a-zA-Z0-9.-]+$', domain)) and len(domain) <= 253
 
 
 def is_private_host(hostname):
@@ -97,6 +103,10 @@ def check_whois(request):
         domain = request.POST.get('domain', '').strip()
         domain = domain.replace('https://', '').replace('http://', '').split('/')[0]
 
+        if not is_valid_domain(domain):
+            error = 'Invalid domain name. Only letters, numbers, dots and hyphens are allowed.'
+            return render(request, 'checker/whois_checker.html', {'result': None, 'error': error, 'domain': domain})
+
         try:
             # WHOIS
             w = whois.whois(domain)
@@ -149,6 +159,12 @@ def check_headers(request):
         if not url.startswith(('http://', 'https://')):
             url = 'https://' + url
 
+        from urllib.parse import urlparse
+        hostname = urlparse(url).hostname or ''
+        if not is_valid_domain(hostname):
+            error = 'Invalid URL. Only letters, numbers, dots and hyphens are allowed.'
+            return render(request, 'checker/header_checker.html', {'results': None, 'error': error, 'url': url, 'score': None})
+
         try:
             from urllib.parse import urlparse
             hostname = urlparse(url).hostname or ''
@@ -198,6 +214,10 @@ def check_ssl(request):
     if request.method == 'POST':
         domain = request.POST.get('domain', '').strip()
         domain = domain.replace('https://', '').replace('http://', '').split('/')[0]
+
+        if not is_valid_domain(domain):
+            error = 'Invalid domain name. Only letters, numbers, dots and hyphens are allowed.'
+            return render(request, 'checker/ssl_checker.html', {'result': None, 'error': error, 'domain': domain})
 
         try:
             if is_private_host(domain):
@@ -269,6 +289,10 @@ def check_ip(request):
 
     if request.method == 'POST':
         ip = request.POST.get('ip', '').strip()
+
+        if not re.match(r'^[0-9a-fA-F.:]+$', ip) or len(ip) > 45:
+            error = 'Invalid IP address.'
+            return render(request, 'checker/ip_checker.html', {'result': None, 'error': error, 'ip': ip})
 
         try:
             # ipinfo.io — konum ve ISP (API key gerekmez)
