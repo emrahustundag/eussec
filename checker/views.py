@@ -339,6 +339,88 @@ def check_ip(request):
     })
 
 
+COMMON_PORTS = {
+    21: 'FTP',
+    22: 'SSH',
+    23: 'Telnet',
+    25: 'SMTP',
+    53: 'DNS',
+    80: 'HTTP',
+    110: 'POP3',
+    143: 'IMAP',
+    443: 'HTTPS',
+    445: 'SMB',
+    3306: 'MySQL',
+    3389: 'RDP',
+    5432: 'PostgreSQL',
+    6379: 'Redis',
+    8080: 'HTTP-Alt',
+    8443: 'HTTPS-Alt',
+    27017: 'MongoDB',
+}
+
+
+def scan_port(host, port):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1)
+        result = sock.connect_ex((host, port))
+        sock.close()
+        return result == 0
+    except Exception:
+        return False
+
+
+def check_ports(request):
+    results = None
+    error = None
+    host = None
+    open_count = 0
+
+    if request.method == 'POST':
+        host = request.POST.get('host', '').strip()
+        host = host.replace('https://', '').replace('http://', '').split('/')[0]
+
+        if not is_valid_domain(host):
+            error = 'Invalid host. Only letters, numbers, dots and hyphens are allowed.'
+            return render(request, 'checker/port_checker.html', {'results': None, 'error': error, 'host': host, 'open_count': 0})
+
+        if is_private_host(host):
+            error = 'Requests to internal/private network addresses are not allowed.'
+            return render(request, 'checker/port_checker.html', {'results': None, 'error': error, 'host': host, 'open_count': 0})
+
+        try:
+            socket.gethostbyname(host)
+        except socket.gaierror:
+            error = 'Host not found. Please check the address.'
+            return render(request, 'checker/port_checker.html', {'results': None, 'error': error, 'host': host, 'open_count': 0})
+
+        try:
+            found = []
+            with ThreadPoolExecutor(max_workers=20) as executor:
+                futures = {
+                    executor.submit(scan_port, host, port): (port, service)
+                    for port, service in COMMON_PORTS.items()
+                }
+                for future in as_completed(futures):
+                    port, service = futures[future]
+                    is_open = future.result()
+                    found.append({'port': port, 'service': service, 'open': is_open})
+
+            results = sorted(found, key=lambda x: x['port'])
+            open_count = sum(1 for r in results if r['open'])
+
+        except Exception as e:
+            error = f'An error occurred: {str(e)}'
+
+    return render(request, 'checker/port_checker.html', {
+        'results': results,
+        'error': error,
+        'host': host,
+        'open_count': open_count,
+    })
+
+
 def check_subdomains(request):
     results = None
     error = None

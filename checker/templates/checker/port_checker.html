@@ -1,0 +1,109 @@
+{% extends 'checker/base.html' %}
+
+{% block title %}Port Scanner — eussec.com{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header { margin-bottom: 32px; }
+    .page-header h2 { font-size: 1.8rem; color: #e6edf3; margin-bottom: 8px; }
+    .page-header p { color: #8b949e; }
+
+    .form-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 28px; margin-bottom: 32px; }
+    .input-row { display: flex; gap: 12px; }
+    .input-row input { flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px 16px; color: #c9d1d9; font-size: 1rem; outline: none; transition: border-color 0.2s; font-family: monospace; }
+    .input-row input:focus { border-color: #58a6ff; }
+    .input-row button { background: #238636; color: #fff; border: none; border-radius: 6px; padding: 12px 24px; font-size: 1rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+    .input-row button:hover { background: #2ea043; }
+
+    .error { background: #3d1c1c; border: 1px solid #f85149; border-radius: 8px; padding: 14px 18px; color: #f85149; margin-bottom: 24px; }
+
+    .summary { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+    .summary-count { font-size: 2.5rem; font-weight: 800; color: {% if open_count > 0 %}#f85149{% else %}#3fb950{% endif %}; line-height: 1; }
+    .summary-text h3 { color: #e6edf3; font-size: 1rem; margin-bottom: 4px; }
+    .summary-text p { color: #8b949e; font-size: 0.85rem; }
+
+    .ports-table { width: 100%; border-collapse: collapse; }
+    .ports-table th { text-align: left; padding: 10px 16px; color: #8b949e; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #30363d; }
+    .ports-table td { padding: 12px 16px; border-bottom: 1px solid #21262d; font-size: 0.9rem; }
+    .ports-table tr:last-child td { border-bottom: none; }
+    .ports-table tr:hover td { background: #1c2128; }
+
+    .port-num { font-family: monospace; color: #c9d1d9; font-weight: 600; }
+    .service-name { color: #8b949e; }
+
+    .status-open { color: #f85149; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .status-closed { color: #484f58; display: flex; align-items: center; gap: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-open { background: #f85149; }
+    .dot-closed { background: #484f58; }
+
+    .results-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; overflow: hidden; }
+    .results-header { padding: 16px 20px; border-bottom: 1px solid #30363d; color: #8b949e; font-size: 0.85rem; }
+    .results-header span { color: #e6edf3; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>🔌 Port Scanner</h2>
+    <p>Scan common ports on any host and see which services are exposed.</p>
+</div>
+
+<div class="form-card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="input-row">
+            <input type="text" name="host" value="{{ host|default:'' }}" placeholder="e.g. example.com or 8.8.8.8" autocomplete="off" spellcheck="false">
+            <button type="submit">Scan</button>
+        </div>
+    </form>
+</div>
+
+{% if error %}
+    <div class="error">{{ error }}</div>
+{% endif %}
+
+{% if results %}
+
+    <div class="summary">
+        <div class="summary-count">{{ open_count }}</div>
+        <div class="summary-text">
+            <h3>Open port{{ open_count|pluralize }} found on {{ host }}</h3>
+            <p>Scanned {{ results|length }} common ports</p>
+        </div>
+    </div>
+
+    <div class="results-card">
+        <div class="results-header">
+            Scanned <span>{{ results|length }} ports</span> — <span>{{ open_count }} open</span>
+        </div>
+        <table class="ports-table">
+            <thead>
+                <tr>
+                    <th>Port</th>
+                    <th>Service</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td><span class="port-num">{{ r.port }}</span></td>
+                    <td><span class="service-name">{{ r.service }}</span></td>
+                    <td>
+                        {% if r.open %}
+                            <span class="status-open"><span class="dot dot-open"></span> Open</span>
+                        {% else %}
+                            <span class="status-closed"><span class="dot dot-closed"></span> Closed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endif %}
+
+{% endblock %}
