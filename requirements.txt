@@ -1,5 +1,5 @@
-django==6.0.5
-requests==2.34.0
+django==5.2.15
+requests==2.34.2
 gunicorn==23.0.0
 whitenoise==6.9.0
 python-whois==0.9.6
