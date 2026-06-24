@@ -9,6 +9,12 @@ import dns.resolver
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.shortcuts import render
+from django.http import HttpResponseTooManyRequests
+from django_ratelimit.decorators import ratelimit
+
+
+def rate_limited(request):
+    return HttpResponseTooManyRequests('Too many requests. Please wait a moment.')
 
 
 def is_valid_domain(domain):
@@ -16,13 +22,23 @@ def is_valid_domain(domain):
     return bool(re.match(r'^[a-zA-Z0-9.-]+$', domain)) and len(domain) <= 253
 
 
-def is_private_host(hostname):
-    """Returns True if the hostname resolves to a private/internal IP."""
+def resolve_to_public_ip(hostname):
+    """
+    DNS rebinding koruması: IP'yi bir kez çöz, private/loopback/link-local ise None döndür.
+    Dönen IP'yi sonraki bağlantılarda kullan — yeniden DNS çözümlemesi yapma.
+    """
     try:
-        ip = socket.gethostbyname(hostname)
-        return ipaddress.ip_address(ip).is_private
+        ip_str = socket.gethostbyname(hostname)
+        addr = ipaddress.ip_address(ip_str)
+        if addr.is_private or addr.is_loopback or addr.is_link_local or addr.is_reserved:
+            return None
+        return ip_str
     except Exception:
-        return False
+        return None
+
+
+def is_private_host(hostname):
+    return resolve_to_public_ip(hostname) is None
 
 SUBDOMAIN_WORDLIST = [
     'www', 'mail', 'ftp', 'smtp', 'pop', 'imap', 'webmail', 'email',
@@ -94,6 +110,7 @@ def blog_flipper_subghz(request):
     return render(request, 'checker/blog_flipper_subghz.html')
 
 
+@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def check_whois(request):
     result = None
     error = None
@@ -142,8 +159,8 @@ def check_whois(request):
                 'dns': dns_records,
             }
 
-        except Exception as e:
-            error = f'Could not retrieve information for this domain: {str(e)}'
+        except Exception:
+            error = 'Could not retrieve information for this domain.'
 
     return render(request, 'checker/whois_checker.html', {
         'result': result,
@@ -152,6 +169,7 @@ def check_whois(request):
     })
 
 
+@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def check_headers(request):
     results = None
     error = None
@@ -176,7 +194,16 @@ def check_headers(request):
                 error = 'Requests to internal/private network addresses are not allowed.'
                 return render(request, 'checker/header_checker.html', {'results': None, 'error': error, 'url': url, 'score': None})
 
-            response = requests.get(url, timeout=10, allow_redirects=True)
+            response = requests.get(url, timeout=10, allow_redirects=False)
+            # Redirect varsa hedef URL'yi de kontrol et
+            if response.is_redirect or response.status_code in (301, 302, 303, 307, 308):
+                location = response.headers.get('Location', '')
+                from urllib.parse import urlparse as _up
+                rhost = _up(location).hostname or ''
+                if rhost and is_private_host(rhost):
+                    error = 'Redirect target is an internal address.'
+                    return render(request, 'checker/header_checker.html', {'results': None, 'error': error, 'url': url, 'score': None})
+                response = requests.get(location or url, timeout=10, allow_redirects=False)
             headers = {k.lower(): v for k, v in response.headers.items()}
 
             results = []
@@ -199,8 +226,8 @@ def check_headers(request):
             error = 'Could not connect to the URL. Please check it and try again.'
         except requests.exceptions.Timeout:
             error = 'Request timed out.'
-        except Exception as e:
-            error = f'An error occurred: {str(e)}'
+        except Exception:
+            error = 'An error occurred while checking headers.'
 
     return render(request, 'checker/header_checker.html', {
         'results': results,
@@ -210,6 +237,7 @@ def check_headers(request):
     })
 
 
+@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def check_ssl(request):
     result = None
     error = None
@@ -286,6 +314,7 @@ def hash_tool(request):
     return render(request, 'checker/hash_tool.html')
 
 
+@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def check_ip(request):
     result = None
     error = None
@@ -329,8 +358,8 @@ def check_ip(request):
                     'abuse': abuse_data,
                 }
 
-        except Exception as e:
-            error = f'Could not retrieve information: {str(e)}'
+        except Exception:
+            error = 'Could not retrieve information for this IP.'
 
     return render(request, 'checker/ip_checker.html', {
         'result': result,
@@ -371,6 +400,7 @@ def scan_port(host, port):
         return False
 
 
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def check_ports(request):
     results = None
     error = None
@@ -410,8 +440,8 @@ def check_ports(request):
             results = sorted(found, key=lambda x: x['port'])
             open_count = sum(1 for r in results if r['open'])
 
-        except Exception as e:
-            error = f'An error occurred: {str(e)}'
+        except Exception:
+            error = 'An error occurred while scanning ports.'
 
     return render(request, 'checker/port_checker.html', {
         'results': results,
@@ -421,6 +451,7 @@ def check_ports(request):
     })
 
 
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def check_subdomains(request):
     results = None
     error = None
@@ -430,6 +461,12 @@ def check_subdomains(request):
     if request.method == 'POST':
         domain = request.POST.get('domain', '').strip()
         domain = domain.replace('https://', '').replace('http://', '').split('/')[0]
+
+        if not is_valid_domain(domain):
+            error = 'Invalid domain name. Only letters, numbers, dots and hyphens are allowed.'
+            return render(request, 'checker/subdomain_checker.html', {
+                'results': None, 'error': error, 'domain': domain, 'found_count': 0,
+            })
 
         if is_private_host(domain):
             error = 'Requests to internal/private network addresses are not allowed.'
@@ -460,8 +497,8 @@ def check_subdomains(request):
             results = sorted(found, key=lambda x: x['subdomain'])
             found_count = len(results)
 
-        except Exception as e:
-            error = f'An error occurred: {str(e)}'
+        except Exception:
+            error = 'An error occurred while scanning subdomains.'
 
     return render(request, 'checker/subdomain_checker.html', {
         'results': results,

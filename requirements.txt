@@ -4,3 +4,4 @@ gunicorn==23.0.0
 whitenoise==6.9.0
 python-whois==0.9.6
 dnspython==2.8.0
+django-ratelimit==4.1.0
