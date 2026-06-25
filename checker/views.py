@@ -8,13 +8,31 @@ import whois
 import dns.resolver
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
+from collections import defaultdict, deque
 from django.shortcuts import render
-from django.http import HttpResponseTooManyRequests
-from django_ratelimit.decorators import ratelimit
+from django.http import HttpResponse
+
+# In-memory rate limit: {ip: deque([timestamps])}
+_rate_limit_log = defaultdict(deque)
+RATE_WINDOW = 60   # saniye
+RATE_MAX = 10      # pencere başına max istek
+RATE_MAX_HEAVY = 5 # port/subdomain için daha düşük limit
 
 
-def rate_limited(request):
-    return HttpResponseTooManyRequests('Too many requests. Please wait a moment.')
+def _is_rate_limited(ip, max_requests=RATE_MAX):
+    now = time.time()
+    log = _rate_limit_log[ip]
+    while log and now - log[0] > RATE_WINDOW:
+        log.popleft()
+    if len(log) >= max_requests:
+        return True
+    log.append(now)
+    return False
+
+
+def _get_ip(request):
+    return request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '')
 
 
 def is_valid_domain(domain):
@@ -110,13 +128,14 @@ def blog_flipper_subghz(request):
     return render(request, 'checker/blog_flipper_subghz.html')
 
 
-@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def check_whois(request):
     result = None
     error = None
     domain = None
 
     if request.method == 'POST':
+        if _is_rate_limited(_get_ip(request)):
+            return HttpResponse('Too many requests. Please wait a moment.', status=429)
         domain = request.POST.get('domain', '').strip()
         domain = domain.replace('https://', '').replace('http://', '').split('/')[0]
 
@@ -169,7 +188,6 @@ def check_whois(request):
     })
 
 
-@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def check_headers(request):
     results = None
     error = None
@@ -177,6 +195,8 @@ def check_headers(request):
     score = None
 
     if request.method == 'POST':
+        if _is_rate_limited(_get_ip(request)):
+            return HttpResponse('Too many requests. Please wait a moment.', status=429)
         url = request.POST.get('url', '').strip()
         if not url.startswith(('http://', 'https://')):
             url = 'https://' + url
@@ -237,13 +257,14 @@ def check_headers(request):
     })
 
 
-@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def check_ssl(request):
     result = None
     error = None
     domain = None
 
     if request.method == 'POST':
+        if _is_rate_limited(_get_ip(request)):
+            return HttpResponse('Too many requests. Please wait a moment.', status=429)
         domain = request.POST.get('domain', '').strip()
         domain = domain.replace('https://', '').replace('http://', '').split('/')[0]
 
@@ -314,13 +335,14 @@ def hash_tool(request):
     return render(request, 'checker/hash_tool.html')
 
 
-@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def check_ip(request):
     result = None
     error = None
     ip = None
 
     if request.method == 'POST':
+        if _is_rate_limited(_get_ip(request)):
+            return HttpResponse('Too many requests. Please wait a moment.', status=429)
         ip = request.POST.get('ip', '').strip()
 
         if not re.match(r'^[0-9a-fA-F.:]+$', ip) or len(ip) > 45:
@@ -400,7 +422,6 @@ def scan_port(host, port):
         return False
 
 
-@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def check_ports(request):
     results = None
     error = None
@@ -408,6 +429,8 @@ def check_ports(request):
     open_count = 0
 
     if request.method == 'POST':
+        if _is_rate_limited(_get_ip(request), max_requests=RATE_MAX_HEAVY):
+            return HttpResponse('Too many requests. Please wait a moment.', status=429)
         host = request.POST.get('host', '').strip()
         host = host.replace('https://', '').replace('http://', '').split('/')[0]
 
@@ -451,7 +474,6 @@ def check_ports(request):
     })
 
 
-@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def check_subdomains(request):
     results = None
     error = None
@@ -459,6 +481,8 @@ def check_subdomains(request):
     found_count = 0
 
     if request.method == 'POST':
+        if _is_rate_limited(_get_ip(request), max_requests=RATE_MAX_HEAVY):
+            return HttpResponse('Too many requests. Please wait a moment.', status=429)
         domain = request.POST.get('domain', '').strip()
         domain = domain.replace('https://', '').replace('http://', '').split('/')[0]
 
