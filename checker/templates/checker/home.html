@@ -4,12 +4,32 @@
 
 {% block extra_css %}
 <style>
-    .hero { display: flex; flex-direction: column; gap: 16px; margin-bottom: 64px; }
+    .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin-bottom: 64px; }
+    .hero-left { display: flex; flex-direction: column; gap: 16px; }
     .hero-tag { color: #3fb950; font-size: 0.9rem; font-weight: 600; letter-spacing: 1px; }
     .hero h1 { font-size: 2.8rem; color: #e6edf3; line-height: 1.2; }
     .hero h1 span { color: #58a6ff; }
-    .hero p { color: #8b949e; font-size: 1.05rem; max-width: 600px; line-height: 1.7; }
+    .hero p { color: #8b949e; font-size: 1.05rem; line-height: 1.7; }
     .hero-buttons { display: flex; gap: 12px; margin-top: 8px; }
+
+    /* TERMINAL */
+    .terminal { background: #0a0e14; border: 1px solid #30363d; border-radius: 10px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+    .terminal-bar { background: #161b22; padding: 10px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+    .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+    .terminal-title { color: #8b949e; font-size: 0.78rem; margin-left: 8px; font-family: 'JetBrains Mono', monospace; }
+    .terminal-body { padding: 18px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.9; min-height: 280px; }
+    .term-line { white-space: pre-wrap; word-break: break-all; }
+    .term-prompt { color: #3fb950; }
+    .term-cmd { color: #e6edf3; }
+    .term-ok { color: #3fb950; }
+    .term-info { color: #58a6ff; }
+    .term-muted { color: #8b949e; }
+    .term-warn { color: #d29922; }
+    .term-cursor { display: inline-block; width: 8px; height: 15px; background: #3fb950; vertical-align: middle; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
 
     .section-title { font-size: 1.1rem; font-weight: 700; color: #e6edf3; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #30363d; }
 
@@ -40,7 +60,8 @@
     .tool-preview-info h3 { color: #e6edf3; font-size: 0.95rem; margin-bottom: 6px; }
     .tool-preview-info p { color: #8b949e; font-size: 0.85rem; }
 
-    @media (max-width: 640px) {
+    @media (max-width: 800px) {
+        .hero { grid-template-columns: 1fr; }
         .hero h1 { font-size: 2rem; }
         .projects-grid { grid-template-columns: 1fr; }
         .tool-preview { flex-direction: column; gap: 16px; align-items: flex-start; }
@@ -52,12 +73,24 @@
 
 <!-- HERO -->
 <section class="hero">
-    <div class="hero-tag">// Security & Software</div>
-    <h1>Hi, I'm <span>Emrah Ustundag</span>.<br>I build secure software.</h1>
-    <p>Software Engineering student at Atılım University with a focus on cybersecurity, backend development, and secure software practices. Based in Ankara, Turkey.</p>
-    <div class="hero-buttons">
-        <a href="/about/" class="btn btn-primary">About Me</a>
-        <a href="/tools/" class="btn btn-outline">Try My Tools</a>
+    <div class="hero-left">
+        <div class="hero-tag">// Security & Software</div>
+        <h1>Hi, I'm <span>Emrah Ustundag</span>.<br>I build secure software.</h1>
+        <p>Software Engineering student at Atılım University with a focus on cybersecurity, backend development, and secure software practices. Based in Ankara, Turkey.</p>
+        <div class="hero-buttons">
+            <a href="/about/" class="btn btn-primary">About Me</a>
+            <a href="/tools/" class="btn btn-outline">Try My Tools</a>
+        </div>
+    </div>
+
+    <div class="terminal" aria-hidden="true">
+        <div class="terminal-bar">
+            <span class="terminal-dot dot-red"></span>
+            <span class="terminal-dot dot-yellow"></span>
+            <span class="terminal-dot dot-green"></span>
+            <span class="terminal-title">eussec — port-scan</span>
+        </div>
+        <div class="terminal-body" id="terminal-body"></div>
     </div>
 </section>
 
@@ -207,4 +240,88 @@
     </div>
 </section>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var body = document.getElementById('terminal-body');
+    if (!body) return;
+
+    // Her adım: ya yazılan komut ya da anlık çıktı satırı.
+    var steps = [
+        { type: 'cmd',  text: 'eussec scan --target eussec.com' },
+        { type: 'out',  html: '<span class="term-muted">[*] Resolving host...</span>' },
+        { type: 'out',  html: '<span class="term-info">[*] eussec.com → 66.33.22.11</span>' },
+        { type: 'out',  html: '<span class="term-muted">[*] Scanning common ports...</span>' },
+        { type: 'out',  html: '<span class="term-ok">[+] 443/tcp  open   HTTPS</span>' },
+        { type: 'out',  html: '<span class="term-ok">[+] 80/tcp   open   HTTP</span>' },
+        { type: 'out',  html: '<span class="term-warn">[-] 22/tcp   closed SSH</span>' },
+        { type: 'out',  html: '<span class="term-muted">[*] Checking TLS certificate...</span>' },
+        { type: 'out',  html: '<span class="term-ok">[+] TLS 1.3 · valid · expires in 86 days</span>' },
+        { type: 'out',  html: '<span class="term-info">[*] Security headers: 6/6 present</span>' },
+        { type: 'out',  html: '<span class="term-ok">[✓] Scan complete — 2 open, 1 filtered</span>' },
+    ];
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function newLine() {
+        var line = document.createElement('div');
+        line.className = 'term-line';
+        body.appendChild(line);
+        return line;
+    }
+
+    function cursorLine() {
+        var line = newLine();
+        line.innerHTML = '<span class="term-prompt">$</span> <span class="term-cmd"></span><span class="term-cursor"></span>';
+        return line;
+    }
+
+    function run() {
+        body.innerHTML = '';
+
+        if (reduce) {
+            // Hareket istemeyen kullanıcı: her şeyi anında göster.
+            steps.forEach(function (s) {
+                var l = newLine();
+                l.innerHTML = s.type === 'cmd'
+                    ? '<span class="term-prompt">$</span> <span class="term-cmd">' + s.text + '</span>'
+                    : s.html;
+            });
+            return;
+        }
+
+        var i = 0;
+        function nextStep() {
+            if (i >= steps.length) {
+                setTimeout(run, 4000); // döngü
+                return;
+            }
+            var step = steps[i++];
+            if (step.type === 'cmd') {
+                var line = cursorLine();
+                var cmdSpan = line.querySelector('.term-cmd');
+                var j = 0;
+                (function typeChar() {
+                    if (j < step.text.length) {
+                        cmdSpan.textContent += step.text.charAt(j++);
+                        setTimeout(typeChar, 45);
+                    } else {
+                        line.querySelector('.term-cursor').remove();
+                        setTimeout(nextStep, 350);
+                    }
+                })();
+            } else {
+                var l = newLine();
+                l.innerHTML = step.html;
+                setTimeout(nextStep, 280);
+            }
+        }
+        nextStep();
+    }
+
+    run();
+})();
+</script>
 {% endblock %}
