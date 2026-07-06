@@ -273,12 +273,15 @@ def check_ssl(request):
             return render(request, 'checker/ssl_checker.html', {'result': None, 'error': error, 'domain': domain})
 
         try:
-            if is_private_host(domain):
+            # DNS rebinding koruması: IP'yi bir kez çöz, ona kilitlen.
+            pinned_ip = resolve_to_public_ip(domain)
+            if pinned_ip is None:
                 error = 'Requests to internal/private network addresses are not allowed.'
                 return render(request, 'checker/ssl_checker.html', {'result': None, 'error': error, 'domain': domain})
 
             context = ssl.create_default_context()
-            with socket.create_connection((domain, 443), timeout=10) as sock:
+            # Çözülen IP'ye bağlan ama sertifika doğrulaması için hostname'i kullan.
+            with socket.create_connection((pinned_ip, 443), timeout=10) as sock:
                 with context.wrap_socket(sock, server_hostname=domain) as ssock:
                     cert = ssock.getpeercert()
                     cipher = ssock.cipher()
@@ -308,8 +311,8 @@ def check_ssl(request):
             error = 'Connection timed out.'
         except socket.gaierror:
             error = 'Domain not found. Please check the domain name.'
-        except Exception as e:
-            error = f'An error occurred: {str(e)}'
+        except Exception:
+            error = 'An error occurred while checking the SSL certificate.'
 
     return render(request, 'checker/ssl_checker.html', {
         'result': result,
@@ -322,8 +325,12 @@ def resolve_subdomain(subdomain, domain):
     full = f'{subdomain}.{domain}'
     try:
         ip = socket.gethostbyname(full)
+        # Özel/iç IP'leri raporlama — araç iç ağ keşfi için kullanılmasın.
+        addr = ipaddress.ip_address(ip)
+        if addr.is_private or addr.is_loopback or addr.is_link_local or addr.is_reserved:
+            return None
         return {'subdomain': full, 'ip': ip}
-    except socket.gaierror:
+    except (socket.gaierror, ValueError):
         return None
 
 
@@ -345,7 +352,9 @@ def check_ip(request):
             return HttpResponse('Too many requests. Please wait a moment.', status=429)
         ip = request.POST.get('ip', '').strip()
 
-        if not re.match(r'^[0-9a-fA-F.:]+$', ip) or len(ip) > 45:
+        try:
+            ipaddress.ip_address(ip)
+        except ValueError:
             error = 'Invalid IP address.'
             return render(request, 'checker/ip_checker.html', {'result': None, 'error': error, 'ip': ip})
 
@@ -367,7 +376,7 @@ def check_ip(request):
                     abuse_data = abuse_resp.json().get('data', {})
 
             if 'error' in ipinfo:
-                error = f"Invalid IP address: {ip}"
+                error = 'Invalid IP address.'
             else:
                 result = {
                     'ip': ip,
@@ -438,21 +447,17 @@ def check_ports(request):
             error = 'Invalid host. Only letters, numbers, dots and hyphens are allowed.'
             return render(request, 'checker/port_checker.html', {'results': None, 'error': error, 'host': host, 'open_count': 0})
 
-        if is_private_host(host):
-            error = 'Requests to internal/private network addresses are not allowed.'
-            return render(request, 'checker/port_checker.html', {'results': None, 'error': error, 'host': host, 'open_count': 0})
-
-        try:
-            socket.gethostbyname(host)
-        except socket.gaierror:
-            error = 'Host not found. Please check the address.'
+        # DNS rebinding koruması: IP'yi bir kez çöz, tarama boyunca ona kilitlen.
+        pinned_ip = resolve_to_public_ip(host)
+        if pinned_ip is None:
+            error = 'Requests to internal/private network addresses are not allowed, or the host was not found.'
             return render(request, 'checker/port_checker.html', {'results': None, 'error': error, 'host': host, 'open_count': 0})
 
         try:
             found = []
             with ThreadPoolExecutor(max_workers=20) as executor:
                 futures = {
-                    executor.submit(scan_port, host, port): (port, service)
+                    executor.submit(scan_port, pinned_ip, port): (port, service)
                     for port, service in COMMON_PORTS.items()
                 }
                 for future in as_completed(futures):
