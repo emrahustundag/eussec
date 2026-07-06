@@ -4,9 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}eussec.com{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; display: flex; flex-direction: column; }
+        body { font-family: 'Space Grotesk', -apple-system, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; display: flex; flex-direction: column; }
+
+        h1, h2, h3, .nav-logo, .section-title, .btn { font-family: 'Space Grotesk', sans-serif; }
+        /* !important: her template kendi <style> bloğunda "font-family: monospace" tanımlıyor;
+           bu genel kural o tanımların üzerine yazılıp JetBrains Mono'yu tutarlı kılar. */
+        code, pre, [class*="mono"], .info-value, .dns-value, .dns-type, .invite-code, .status-tag,
+        .cert-code, .code-block, .hash-algo, .hash-value, .header-example, .header-value,
+        .ip-addr, .port-num, .subdomain-name, .value, .domain-name {
+            font-family: 'JetBrains Mono', monospace !important;
+        }
 
         /* NAV */
         nav { background: #161b22; border-bottom: 1px solid #30363d; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
