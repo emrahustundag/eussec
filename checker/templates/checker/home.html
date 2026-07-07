@@ -31,6 +31,15 @@
     .term-cursor { display: inline-block; width: 8px; height: 15px; background: #3fb950; vertical-align: middle; animation: blink 1s step-end infinite; }
     @keyframes blink { 50% { opacity: 0; } }
 
+    /* SELF-SCORE BAR */
+    .self-score { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 14px 22px; margin-bottom: 56px; flex-wrap: wrap; }
+    .self-score-left { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: #c9d1d9; }
+    .self-score-ring { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.78rem; flex-shrink: 0; }
+    .self-score-ring.full { background: rgba(63,185,80,0.15); color: #3fb950; border: 2px solid #3fb950; }
+    .self-score-ring.partial { background: rgba(210,153,34,0.15); color: #d29922; border: 2px solid #d29922; }
+    .self-score-link { color: #58a6ff; font-size: 0.85rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .self-score-link:hover { text-decoration: underline; }
+
     .section-title { font-size: 1.1rem; font-weight: 700; color: #e6edf3; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #30363d; }
 
     /* SKILLS */
@@ -109,6 +118,15 @@
         <div class="terminal-body" id="terminal-body"></div>
     </div>
 </section>
+
+<!-- SELF-SCORE -->
+<div class="self-score reveal">
+    <div class="self-score-left">
+        <div class="self-score-ring {% if own_score.checked == own_score.total %}full{% else %}partial{% endif %}">{{ own_score.score }}</div>
+        <span>eussec.com scores <strong>{{ own_score.checked }}/{{ own_score.total }}</strong> on its own security header checker.</span>
+    </div>
+    <a href="/tools/headers/" class="self-score-link">Verify it yourself →</a>
+</div>
 
 <!-- SKILLS -->
 <section class="skills-section reveal">

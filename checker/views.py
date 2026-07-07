@@ -100,8 +100,39 @@ HEADERS_INFO = {
 }
 
 
+def get_own_security_score():
+    """
+    eussec.com'un kendi güvenlik başlıklarını hesapla — dış HTTP isteği atmadan,
+    doğrudan SecurityHeadersMiddleware + Django ayarlarına bakarak. Bu yüzden
+    ana sayfa yüklemesi yavaşlamaz ve sonuç ağ hatalarına bağlı değildir.
+    """
+    from django.conf import settings
+
+    # SecurityHeadersMiddleware her yanıta bunları koşulsuz ekler.
+    present = {
+        'Content-Security-Policy': True,
+        'X-Frame-Options': True,
+        'X-Content-Type-Options': True,
+        'Referrer-Policy': True,
+        'Permissions-Policy': True,
+        # HSTS yalnızca production'da (DEBUG=False) Django'nun SecurityMiddleware'i
+        # tarafından eklenir; ayrıntı için config/settings.py'deki SECURE_HSTS_SECONDS'a bak.
+        'Strict-Transport-Security': getattr(settings, 'SECURE_HSTS_SECONDS', 0) > 0,
+    }
+    checked = sum(1 for v in present.values() if v)
+    total = len(present)
+    return {
+        'present': present,
+        'checked': checked,
+        'total': total,
+        'score': round((checked / total) * 100),
+    }
+
+
 def home(request):
-    return render(request, 'checker/home.html')
+    return render(request, 'checker/home.html', {
+        'own_score': get_own_security_score(),
+    })
 
 
 def about(request):
