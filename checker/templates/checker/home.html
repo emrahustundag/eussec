@@ -66,6 +66,22 @@
         .projects-grid { grid-template-columns: 1fr; }
         .tool-preview { flex-direction: column; gap: 16px; align-items: flex-start; }
     }
+
+    /* Kartların art arda değil, kademeli belirmesi için */
+    .project-card.reveal:nth-child(1) { transition-delay: 0s; }
+    .project-card.reveal:nth-child(2) { transition-delay: 0.08s; }
+    .project-card.reveal:nth-child(3) { transition-delay: 0.16s; }
+    .project-card.reveal:nth-child(4) { transition-delay: 0.24s; }
+    .tool-preview.reveal:nth-child(1) { transition-delay: 0s; }
+    .tool-preview.reveal:nth-child(2) { transition-delay: 0.06s; }
+    .tool-preview.reveal:nth-child(3) { transition-delay: 0.12s; }
+    .tool-preview.reveal:nth-child(4) { transition-delay: 0.18s; }
+    .tool-preview.reveal:nth-child(5) { transition-delay: 0.24s; }
+    .tool-preview.reveal:nth-child(6) { transition-delay: 0.3s; }
+    .tool-preview.reveal:nth-child(7) { transition-delay: 0.36s; }
+    .cert-item.reveal:nth-child(1) { transition-delay: 0s; }
+    .cert-item.reveal:nth-child(2) { transition-delay: 0.1s; }
+    .cert-item.reveal:nth-child(3) { transition-delay: 0.2s; }
 </style>
 {% endblock %}
 
@@ -95,7 +111,7 @@
 </section>
 
 <!-- SKILLS -->
-<section class="skills-section">
+<section class="skills-section reveal">
     <div class="section-title">Skills</div>
     <div class="skills-grid">
         <span class="badge badge-blue">Python</span>
@@ -116,9 +132,9 @@
 
 <!-- PROJECTS -->
 <section class="projects-section">
-    <div class="section-title">Projects</div>
+    <div class="section-title reveal">Projects</div>
     <div class="projects-grid">
-        <a href="https://github.com/emrahustundag" target="_blank" class="project-card">
+        <a href="https://github.com/emrahustundag" target="_blank" class="project-card reveal">
             <h3>Library Management System</h3>
             <p>Web-based system with Django. Authentication, CRUD operations, normalized relational database.</p>
             <div class="project-tags">
@@ -127,7 +143,7 @@
                 <span class="badge badge-orange">SQL</span>
             </div>
         </a>
-        <a href="https://github.com/emrahustundag/car-rental-ui" target="_blank" class="project-card">
+        <a href="https://github.com/emrahustundag/car-rental-ui" target="_blank" class="project-card reveal">
             <h3>Car Rental Management System</h3>
             <p>Oracle-based relational database schema with full CRUD, constraints, and HTML/CSS/JS frontend.</p>
             <div class="project-tags">
@@ -135,7 +151,7 @@
                 <span class="badge badge-blue">HTML/CSS/JS</span>
             </div>
         </a>
-        <a href="/tools/headers/" class="project-card">
+        <a href="/tools/headers/" class="project-card reveal">
             <h3>HTTP Security Header Checker</h3>
             <p>Analyzes HTTP security headers of any website and returns a security score with detailed breakdown.</p>
             <div class="project-tags">
@@ -144,7 +160,7 @@
                 <span class="badge badge-green">Security</span>
             </div>
         </a>
-        <a href="https://github.com/emrahustundag/stockflow" target="_blank" class="project-card">
+        <a href="https://github.com/emrahustundag/stockflow" target="_blank" class="project-card reveal">
             <h3>StockFlow</h3>
             <p>Full-stack inventory management platform with sales, purchases, customers, suppliers, and audit logging.</p>
             <div class="project-tags">
@@ -159,8 +175,8 @@
 
 <!-- CERTS -->
 <section class="certs-section">
-    <div class="section-title">Certifications</div>
-    <div class="cert-item">
+    <div class="section-title reveal">Certifications</div>
+    <div class="cert-item reveal">
         <div class="cert-icon">🛡️</div>
         <div>
             <div class="cert-name">Google Cybersecurity Professional Certificate</div>
@@ -168,14 +184,14 @@
             <div class="cert-detail" style="margin-top:4px; font-size:0.8rem; color:#484f58;">Certificate No: CGFKAK3FFLSI</div>
         </div>
     </div>
-    <div class="cert-item">
+    <div class="cert-item reveal">
         <div class="cert-icon">💻</div>
         <div>
             <div class="cert-name">CSCON'24</div>
             <div class="cert-detail">C# — 2024</div>
         </div>
     </div>
-    <div class="cert-item">
+    <div class="cert-item reveal">
         <div class="cert-icon">🎓</div>
         <div>
             <div class="cert-name">Certificate of Honor</div>
@@ -186,51 +202,51 @@
 
 <!-- TOOLS PREVIEW -->
 <section class="tools-section">
-    <div class="section-title">Tools</div>
+    <div class="section-title reveal">Tools</div>
     <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div class="tool-preview">
+        <div class="tool-preview reveal">
             <div class="tool-preview-info">
                 <h3>HTTP Security Header Checker</h3>
                 <p>Enter any URL and get an instant security header analysis with scoring.</p>
             </div>
             <a href="/tools/headers/" class="btn btn-primary">Try it →</a>
         </div>
-        <div class="tool-preview">
+        <div class="tool-preview reveal">
             <div class="tool-preview-info">
                 <h3>SSL/TLS Certificate Checker</h3>
                 <p>Check SSL certificate validity, expiry date, and cipher strength for any domain.</p>
             </div>
             <a href="/tools/ssl/" class="btn btn-primary">Try it →</a>
         </div>
-        <div class="tool-preview">
+        <div class="tool-preview reveal">
             <div class="tool-preview-info">
                 <h3>Subdomain Enumerator</h3>
                 <p>Discover active subdomains of any domain via DNS resolution.</p>
             </div>
             <a href="/tools/subdomains/" class="btn btn-primary">Try it →</a>
         </div>
-        <div class="tool-preview">
+        <div class="tool-preview reveal">
             <div class="tool-preview-info">
                 <h3>WHOIS & DNS Lookup</h3>
                 <p>Retrieve registration details, expiry dates, and DNS records for any domain.</p>
             </div>
             <a href="/tools/whois/" class="btn btn-primary">Try it →</a>
         </div>
-        <div class="tool-preview">
+        <div class="tool-preview reveal">
             <div class="tool-preview-info">
                 <h3>Password Strength Checker</h3>
                 <p>Analyze password strength locally — score, crack time estimate, and improvement tips.</p>
             </div>
             <a href="/tools/password/" class="btn btn-primary">Try it →</a>
         </div>
-        <div class="tool-preview">
+        <div class="tool-preview reveal">
             <div class="tool-preview-info">
                 <h3>Hash Generator & Identifier</h3>
                 <p>Generate MD5, SHA-1/256/512 hashes or identify an unknown hash type instantly.</p>
             </div>
             <a href="/tools/hash/" class="btn btn-primary">Try it →</a>
         </div>
-        <div class="tool-preview">
+        <div class="tool-preview reveal">
             <div class="tool-preview-info">
                 <h3>IP Reputation Checker</h3>
                 <p>Check if an IP has been reported for malicious activity. Location, ISP, abuse score.</p>
